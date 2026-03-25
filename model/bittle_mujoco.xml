@@ -1,0 +1,130 @@
+<mujoco model="bittle_mujoco">
+    <compiler angle="radian" coordinate="local" />
+    <option timestep="0.002" gravity="0 0 -9.81" /> 
+    <!-- Physics timestep -->
+    <!--
+    0.01 -> 100 Hz
+    0.002 -> 500 Hz 
+    0.001 -> 1000 Hz 
+    -->
+
+    <default>
+        <joint damping="2" armature="0.01" />
+        <geom friction="0.8 0.1 0.1" density="1000" />
+        <motor ctrllimited="true" ctrlrange="-1 1" />
+    </default>
+
+    <worldbody>
+        <!-- Ground plane -->
+        <geom 
+            name="ground" 
+            type="plane" 
+            pos="0 0 0" 
+            size="10 10 0.1" 
+            rgba="0.8 0.8 0.4 1" 
+        />
+
+        <!-- Main body -->
+        <body name="torso" pos="0 0 0.3">
+            <geom type="box" size="0.12 0.05 0.025" rgba="0.3 0.3 0.8 1" />
+            
+            <freejoint />
+
+            <!-- IMU site -->
+            <site name="imu" pos="0 0 0" size="0.01" />
+
+            <!-- Front Left Leg -->
+            <body name="front_left_hip" pos="0.10 0.05 0">
+                <joint name="front_left_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                <body name="front_left_knee" pos="0 0 -0.10">
+                    <joint name="front_left_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                    <geom name="front_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                    <geom name="front_left_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                </body>
+            </body>
+
+            <!-- Front Right Leg -->
+            <body name="front_right_hip" pos="0.10 -0.05 0">
+                <joint name="front_right_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                <body name="front_right_knee" pos="0 0 -0.10">
+                    <joint name="front_right_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                    <geom name="front_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                    <geom name="front_right_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                </body>
+            </body>
+
+            <!-- Back Left Leg -->
+            <body name="back_left_hip" pos="-0.10 0.05 0">
+                <joint name="back_left_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                <body name="back_left_knee" pos="0 0 -0.10">
+                    <joint name="back_left_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                    <geom name="back_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                    <geom name="back_left_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                </body>
+            </body>
+
+            <!-- Back Right Leg -->
+            <body name="back_right_hip" pos="-0.10 -0.05 0">
+                <joint name="back_right_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                <body name="back_right_knee" pos="0 0 -0.10">
+                    <joint name="back_right_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+
+                    <geom name="back_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+
+                    <geom name="back_right_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+
+    <!-- Servo actuators -->
+    <actuator>
+        <position joint="front_left_hip_joint" kp="40" />
+        <position joint="front_left_knee_joint" kp="40" />
+
+        <position joint="front_right_hip_joint" kp="40" />
+        <position joint="front_right_knee_joint" kp="40" />
+
+        <position joint="back_left_hip_joint" kp="40" />
+        <position joint="back_left_knee_joint" kp="40" />
+
+        <position joint="back_right_hip_joint" kp="40" />
+        <position joint="back_right_knee_joint" kp="40" />
+    </actuator>
+
+    <!-- Sensors -->
+    <sensor>
+        <!-- IMU Orientation -->
+        <framequat objtype="site" objname="imu" name="imu_quat" />
+
+        <!-- angular velocity -->
+        <gyro site="imu" name="imu_gyro" />
+
+        <!-- linear acceleration -->
+        <accelerometer site="imu" name="imu_accel" />
+
+
+       
+
+    </sensor>
+
+</mujoco>
