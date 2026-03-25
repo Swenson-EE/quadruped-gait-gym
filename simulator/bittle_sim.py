@@ -85,7 +85,7 @@ class BittleSimulator:
         start = self.model.sensor_adr[sensor_id]
         end = start + self.model.sensor_dim[sensor_id]
 
-        return self.data.sensordata[start:end]
+        return self.data.sensordata[start:end].copy()
             
     def get_joint_angles(self):
         return np.rad2deg([
@@ -93,13 +93,13 @@ class BittleSimulator:
         ]).astype(int)
 
     def get_position(self):
-        return self.data.qpos[0:3] # x, y, z position (m)
+        return self.data.qpos[0:3].copy() # x, y, z position (m)
 
     def get_velocity(self):
-        return self.data.qvel[0:3] # Linear velocity in world frame (m/s)
+        return self.data.qvel[0:3].copy() # Linear velocity in world frame (m/s)
     
     def _update_rotation_matrix(self):
-        quat = self.data.qpos[3:7] # Quaternion (w, x, y, z)
+        quat = self.data.qpos[3:7].copy() # Quaternion (w, x, y, z)
         rot_mat = np.zeros(9)
         mujoco.mju_quat2Mat(rot_mat, quat) # Rotation matrix from world frame to local frame
         self._rot_mat = rot_mat.reshape(3, 3)
