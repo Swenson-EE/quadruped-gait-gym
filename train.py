@@ -26,9 +26,25 @@ if __name__ == "__main__":
 
     
     model = None
-    name = f'{training_job.algo}'          
+    name = f'{training_job.algo}'      
+
+    
+    from checkpoints.checkpoints_names import get_latest_checkpoint
+
+    last_checkpoint = get_latest_checkpoint(
+        algo=training_job.algo,
+        # Any additional metadata for checkpoint naming
+        layers=training_job.net_arch
+    )
+
+    if last_checkpoint:
+        print(f"Found previous checkpoint ({last_checkpoint})")
+
+        model = ModelClass.load(last_checkpoint, env=env)
+
 
     if model is None:
+        print(f"Creating new checkpoint (algo={training_job.algo}, layers=({training_job.net_arch}))")
 
         custom_architecture = dict(net_arch=training_job.net_arch)
 
@@ -47,13 +63,22 @@ if __name__ == "__main__":
         )
 
 
-    print("Start learning")
+    
+
+    from checkpoints.checkpoints_names import next_checkpoint
+    next_checkpoint_save, trained_name = next_checkpoint(
+        algo=training_job.algo,
+        # Any additional metadata for checkpoint naming
+        layers=training_job.net_arch
+    )
+
+    print(f"Start learning {trained_name}")
 
     model.learn(
         total_timesteps=training_job.total_steps,
         progress_bar=True,
     )
     
-    model.save('bittle-gait')
+    model.save(next_checkpoint_save)
     
-    print("Saved model")
+    print(f"Saved model {next_checkpoint_save}")
