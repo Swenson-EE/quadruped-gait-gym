@@ -75,12 +75,15 @@ if __name__ == "__main__":
     print(f"Start learning {trained_name}")
 
     from loggers.multi_logger_callback import MultiLoggerCallback
+    from loggers.reward_logger import RewardLogger
 
     logger_callback = MultiLoggerCallback(
         name=trained_name,
         algo=training_job.algo,
         loggers=[
-
+            RewardLogger(
+                log_frequency=training_job.recording_frequency
+            )
         ],
         verbose=training_job.verbose
     )

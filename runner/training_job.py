@@ -18,9 +18,9 @@ class TrainingJob:
     parallel_env: int = 8
     total_steps: int = 1e6
     batch_steps: int = 2048
-
-    continue_training: bool = True
+    
     device: str = 'cpu' # 'cuda' for gpu, and 'cpu' for cpu
+    recording_frequency: int = 50
     verbose: int = 0
     
     
