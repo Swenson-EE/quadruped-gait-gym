@@ -127,6 +127,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         movement_reward = rewards.WT_Movement * local_position_delta[0]
         movement_penalty = rewards.WT_Movement * abs(local_position_delta[1])
 
+        velocity_reward = rewards.WT_Velocity * velocity[0]
+        velocity_penalty = rewards.WT_Velocity * abs(velocity[1])
+
         # Calculate joint jitter penalty
         jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
         smooth_movement_penalty = rewards.WT_Smooth * np.sum(jitter_1st_order**2 + jitter_2nd_order**2)
@@ -151,10 +154,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         reward = {
             'movement': movement_reward,
+            'velocity': velocity_reward,
         }
 
         penalty = {
             'movement': movement_penalty,
+            'velocity': velocity_penalty,
             'smooth': smooth_movement_penalty,
             'clearance': clearance_penalty,
             'crawling': crawling_penalty,
