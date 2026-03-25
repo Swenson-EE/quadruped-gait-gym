@@ -3,8 +3,10 @@ import mujoco.viewer
 import time
 
 from environment.base_bittle_environment import BaseBittleEnvironment
+from environment.continuous_bittle_environment import ContinuousBittleEnvironment
 
 TEST_MODE = "manual"  # Set to "manual" for manual stepping, "auto" for automatic stepping
+ENVIRONMENT = 'c'
 
 step_flag = False
 def key_callback(keycode):
@@ -13,7 +15,13 @@ def key_callback(keycode):
         step_flag = True
 
 if __name__ == "__main__":
-    env: BaseBittleEnvironment = BaseBittleEnvironment()
+    env: BaseBittleEnvironment = None
+    match ENVIRONMENT.lower():
+        case 'c':
+            env = ContinuousBittleEnvironment()
+        case _:
+            print(f"Invalid environment type {ENVIRONMENT}")
+            exit()
 
     obs, info = env.reset()
     
