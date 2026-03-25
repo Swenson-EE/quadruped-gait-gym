@@ -76,12 +76,16 @@ if __name__ == "__main__":
 
     from loggers.multi_logger_callback import MultiLoggerCallback
     from loggers.reward_logger import RewardLogger
+    from loggers.observation_logger import ObservationLogger
 
     logger_callback = MultiLoggerCallback(
         name=trained_name,
         algo=training_job.algo,
         loggers=[
             RewardLogger(
+                log_frequency=training_job.recording_frequency
+            ),
+            ObservationLogger(
                 log_frequency=training_job.recording_frequency
             )
         ],
