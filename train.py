@@ -1,5 +1,4 @@
 
-
 if __name__ == "__main__":
     from algorithms.algorithm_types import Algorithm
     from runner.training_job import TrainingJob, training_job_parser
@@ -15,7 +14,7 @@ if __name__ == "__main__":
         print("No env instantiated")
         exit()
     
-    print('Created env')
+    print('Created env ')
     
     
     ModelClass = get_algo_model(training_job.algo)
