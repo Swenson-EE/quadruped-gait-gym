@@ -74,9 +74,22 @@ if __name__ == "__main__":
 
     print(f"Start learning {trained_name}")
 
+    from loggers.multi_logger_callback import MultiLoggerCallback
+
+    logger_callback = MultiLoggerCallback(
+        name=trained_name,
+        algo=training_job.algo,
+        loggers=[
+
+        ],
+        verbose=training_job.verbose
+    )
+
+
     model.learn(
         total_timesteps=training_job.total_steps,
         progress_bar=True,
+        callback=logger_callback,
     )
     
     model.save(next_checkpoint_save)
