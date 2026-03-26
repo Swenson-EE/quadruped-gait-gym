@@ -1,7 +1,7 @@
-from loggers.periodic_logger import PeriodicLogger
+#from loggers.periodic_logger import PeriodicLogger
+from loggers.periodic_average_logger import PeriodicAverageLogger
 
-
-class RewardLogger(PeriodicLogger):
+class RewardLogger(PeriodicAverageLogger):
     def __init__(self, log_frequency=10):
         super().__init__("Rewards", log_frequency=log_frequency, items_to_track={
             'reward': ['movement', 'velocity'],

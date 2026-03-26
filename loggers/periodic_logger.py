@@ -1,7 +1,7 @@
 import pandas as pd
 
 from loggers.base_logger import BaseLogger
-
+import numpy as np
 
 class PeriodicLogger(BaseLogger):
     def __init__(self, name, log_frequency=10, items_to_track = {}):
@@ -59,18 +59,23 @@ class PeriodicLogger(BaseLogger):
 
     def on_training_end(self):
         # Average across envs per episode
-        averaged_rows = []
+        rows = []
         for ep_num in sorted(self.finished_episodes.keys()):
             env_dicts = self.finished_episodes[ep_num]
-            avg_row = {"episode": ep_num}
+            ep_row = {"episode": ep_num}
 
             for main_key, sub_keys in self.items_to_track.items():
                 for sub_key in sub_keys:
-                    # Average across envs
-                    avg_row[f"{main_key}_{sub_key}"] = sum(
-                        d[main_key][sub_key] for d in env_dicts
-                    ) / len(env_dicts)
+                    ep_row[f"{main_key}_{sub_key}"] = self.row_operation(
+                        values=[d[main_key][sub_key] for d in env_dicts], 
+                        length=len(env_dicts)
+                    )
+            
+            rows.append(ep_row)
 
-            averaged_rows.append(avg_row)
-        
-        return pd.DataFrame(averaged_rows)
+        return pd.DataFrame(rows)
+    
+    def row_operation(self, values, length):
+        return 0
+
+
