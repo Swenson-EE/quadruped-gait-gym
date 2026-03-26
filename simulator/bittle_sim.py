@@ -130,12 +130,6 @@ class BittleSimulator:
         roll_rate, pitch_rate, _ = imu_gyro
         return roll_rate, pitch_rate
     
-    def is_fallen(self):
-        fall_angle = self.params.fall_angle
-        roll, pitch = self.get_tilt()
-
-        is_fallen = (np.fabs(roll) > fall_angle) or (np.fabs(pitch) > fall_angle)
-        return is_fallen
     
     def get_feet_z(self):
         feet_z = { geom_id: self.data.geom_xpos[geom_id][2] for geom_id in self.foot_geom_ids }
@@ -150,4 +144,17 @@ class BittleSimulator:
                 num_arms_contacting += 1
         
         return num_arms_contacting
+
+    
+    def is_fallen(self):
+        fall_angle = self.params.fall_angle
+        roll, pitch = self.get_tilt()
+
+        is_fallen = (np.fabs(roll) > fall_angle) or (np.fabs(pitch) > fall_angle)
+        return is_fallen
+    
+    def is_moving(self, moving_threshold = 1e-3):
+        return np.linalg.norm(self.get_velocity()) > moving_threshold
+    
+    
 
