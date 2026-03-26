@@ -74,3 +74,25 @@ def get_latest_checkpoint(algo: Algorithm, save_dir="saved", **metadata):
 
     latest_file = max(numbers, key=lambda x: x[0])[1]
     return os.path.join(save_dir, latest_file)
+
+
+def get_checkpoint(algo: Algorithm, n: int, save_dir="saved", **metadata):
+    """
+    Returns the pth to the checkpoint (n) in the directory.
+    If n doesn't exist, returns None.
+    """
+    save_dir = f"{save_dir}/{algo}/checkpoints"
+    if not os.path.exists(save_dir):
+        return None
+    
+    meta_str = encode_metadata(**metadata)
+    prefix = f"{algo}_{meta_str}" if meta_str else f"{algo}"
+
+    checkpoint_file = f"{prefix}_{n}.zip"
+
+    checkpoint_path = os.path.join(save_dir, checkpoint_file)
+    if os.path.exists(checkpoint_path):
+        return checkpoint_path
+
+    return None
+
