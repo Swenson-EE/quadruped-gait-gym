@@ -15,10 +15,7 @@ if __name__ == "__main__":
     manager.connect()
 
     queue = manager.get_queue()
-
-    # job = {
-    #     "algo": "ddpg"
-    # }
+    
     print('job:', job)
     queue.put(job)
     print("Job submitted")
