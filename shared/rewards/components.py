@@ -7,7 +7,6 @@ class RewardComponents:
     position: np.ndarray
     velocity: np.ndarray
     
-    #joint_jitter: tuple[np.ndarray, np.ndarray]
     jitter_1st_order: np.ndarray
     jitter_2nd_order: np.ndarray
 
