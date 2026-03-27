@@ -2,7 +2,10 @@ from runner.training_job import TrainingJob, training_job_parser
 
 
 def train(training_job: TrainingJob):
-    print('Job:', training_job)
+    print("----------------------------")
+    print('Training')
+    print(training_job)
+    print("----------------------------")
 
     from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
     env = get_algo_vec_environment(training_job.algo, training_job.parallel_env)

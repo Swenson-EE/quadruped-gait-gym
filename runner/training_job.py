@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict, field
+from enum import Enum
 
 from shared.algorithm.algorithm_types import Algorithm
 from runner.training_parser import build_parser_from_dataclass
@@ -23,6 +24,9 @@ class TrainingJob:
     recording_frequency: int = 10
     verbose: int = 0
     
+    def __str__(self):
+        fields = vars(self)
+        return "\n".join(f"{k}: {v}" for k, v in fields.items())
     
 
     def to_cli_args(self):
@@ -32,6 +36,8 @@ class TrainingJob:
                 # extend the list as separate arguments (for nargs="+")
                 args.extend([f"--{k}"] + [str(i) for i in v])
             else:
+                if isinstance(v, Enum):
+                    v = v.value
                 args.extend([f"--{k}", str(v)])
         
         return args
