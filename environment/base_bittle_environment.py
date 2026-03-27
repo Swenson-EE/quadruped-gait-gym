@@ -5,6 +5,7 @@ import gymnasium as gym
 import numpy as np
 
 #from parameters import rewards
+from shared.rewards.components import RewardComponents
 from shared.rewards.rewards import Rewards
 from simulator.bittle_sim import BittleParameters, BittleSimulator
 
@@ -79,7 +80,10 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         
         
         observation = self.get_observation()
-        reward, penalty = self.get_reward()
+
+        components = self.get_reward_components()
+        reward, penalty = self.get_reward(components=components)
+
         info = self.get_info()
         info['reward'] = reward
         info['penalty'] = penalty
@@ -119,57 +123,73 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             "accel": imu_accel
         }
 
-    def get_reward_components(self):
-        pass
-    
-    def get_reward(self):
-        current_position = self.sim.get_position()
+    def get_reward_components(self) -> RewardComponents:
+        position = self.sim.get_position()
         velocity = self.sim.world_to_local(self.sim.get_velocity())
 
+        jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
+
+        imu_gyro = self.sim.get_sensor(self.sim.params.sensor_gyro)
+        imu_accel = self.sim.get_sensor(self.sim.params.sensor_accel)
+
+        paw_clearance = self.sim.get_feet_z()
+        num_arms_contacting = self.sim.get_num_contacting_arms()
+
+        roll, pitch = self.sim.get_tilt()
+
+        return RewardComponents(
+            position=position,
+            velocity=velocity,
+
+            jitter_1st_order=jitter_1st_order,
+            jitter_2nd_order=jitter_2nd_order,
+
+            imu_gyro=imu_gyro,
+            imu_accel=imu_accel,
+
+            paw_clearance=paw_clearance,
+            num_arms_contacting=num_arms_contacting,
+
+            roll=roll,
+            pitch=pitch
+        )
+    
+    def get_reward(self, components: RewardComponents):
         # Calculate movement reward and penalty
-        position_delta = current_position - self.last_position
+        position_delta = components.position - self.last_position
         local_position_delta = self.initial_rotation @ position_delta
         
 
         movement_reward = self.rewards.WT_Movement * local_position_delta[0]
         movement_penalty = self.rewards.WT_LateralMovement * abs(local_position_delta[1])
 
-        #velocity_reward = self.rewards.WT_Velocity * velocity[0]
-        velocity_penalty = self.rewards.WT_Velocity * abs(velocity[1])
+        #velocity_reward = self.rewards.WT_Velocity * components.velocity[0]
+        velocity_penalty = self.rewards.WT_Velocity * abs(components.velocity[1])
 
         progress_penalty = 0
-        if local_position_delta[0] < 0.001:
-            progress_penalty = 0.02
+        if local_position_delta[0] < 0.01:
+            progress_penalty = 1
         
-
 
         # Calculate joint jitter penalty
-        jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
-        smooth_movement_penalty = self.rewards.WT_Smooth * np.sum(jitter_1st_order**2 + jitter_2nd_order**2)
-
+        smooth_movement_penalty = self.rewards.WT_Smooth * np.sum(components.jitter_1st_order**2 + components.jitter_2nd_order**2)
 
         # Calculate clearance penalty
-        paw_clearance = self.sim.get_feet_z()
-        clearance_penalty = self.rewards.WT_Clearance * sum( [max(0, foot_z - self.rewards.PAW_Z_THRESHOLD) for foot_z in paw_clearance.values()] )
+        clearance_penalty = self.rewards.WT_Clearance * sum( [max(0, foot_z - self.rewards.PAW_Z_THRESHOLD) for foot_z in components.paw_clearance.values()] )
 
         # Calculate crawling penalty
-        num_arms_contacting = self.sim.get_num_contacting_arms()
-        crawling_penalty = self.rewards.WT_Crawl * num_arms_contacting
+        crawling_penalty = self.rewards.WT_Crawl * components.num_arms_contacting
 
-        # Calculate tilt penalty
-        roll, pitch = self.sim.get_tilt()
-        imu_gyro = self.sim.get_sensor(self.sim.params.sensor_gyro)
-        
-        stability_angle_penalty = self.rewards.WT_Instability * (roll**2 + pitch**2)
-        stability_rate_penalty = self.rewards.WT_Instability * (imu_gyro[0]**2 + imu_gyro[1]**2)
-        z_bounce_penalty = self.rewards.WT_Instability * self.rewards.WT_Bouncing * np.abs(velocity[2])
+        # Calculate tilt penalty        
+        stability_angle_penalty = self.rewards.WT_Instability * (components.roll**2 + components.pitch**2)
+        stability_rate_penalty = self.rewards.WT_Instability * (components.imu_gyro[0]**2 + components.imu_gyro[1]**2)
+        z_bounce_penalty = self.rewards.WT_Instability * self.rewards.WT_Bouncing * np.abs(components.velocity[2])
         
         # Calculate inactivity penalty
         inactive_penalty = 0
         if not self.sim.is_moving():
             inactive_penalty = self.rewards.WT_Inactive
         
-
 
         reward = {
             'movement': movement_reward,
