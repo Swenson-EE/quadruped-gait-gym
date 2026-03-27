@@ -4,7 +4,7 @@ from runner.training_job import TrainingJob, training_job_parser
 def train(training_job: TrainingJob):
     print('Job:', training_job)
 
-    from algorithms.algorithm_info import get_algo_vec_environment, get_algo_model
+    from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
     env = get_algo_vec_environment(training_job.algo, training_job.parallel_env)
     if env is None:
         print("No env instantiated")

@@ -2,7 +2,7 @@ from dataclasses import field
 import os, shutil
 import argparse
 
-from algorithms.algorithm_types import Algorithm
+from shared.algorithm.algorithm_types import Algorithm
 
 def parse_algorithm(value: str) -> Algorithm:
     try:

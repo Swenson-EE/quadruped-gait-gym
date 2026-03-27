@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict, field
 
-from algorithms.algorithm_types import Algorithm
+from shared.algorithm.algorithm_types import Algorithm
 from runner.training_parser import build_parser_from_dataclass
 
 

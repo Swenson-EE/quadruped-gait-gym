@@ -3,8 +3,8 @@ import time
 
 import mujoco.viewer
 
-from algorithms.algorithm_info import get_algo_environment, get_algo_model
-from algorithms.algorithm_types import Algorithm
+from shared.algorithm.algorithm_info import get_algo_environment, get_algo_model
+from shared.algorithm.algorithm_types import Algorithm
 from checkpoints.checkpoints_names import get_checkpoint, get_latest_checkpoint
 
 

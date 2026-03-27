@@ -1,6 +1,5 @@
-from algorithms.algorithm_types import Algorithm
+from shared.algorithm.algorithm_types import Algorithm
 from runner.training_job import TrainingJob
-
 
 run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
