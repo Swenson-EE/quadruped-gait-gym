@@ -3,3 +3,6 @@ __pycache__/
 
 # All saved models and data is in the saved directory
 saved/
+
+# TEMPORARY: Until ready to work on runtime environment
+runtime/ 
