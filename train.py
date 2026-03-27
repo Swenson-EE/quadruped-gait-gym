@@ -1,11 +1,7 @@
+from runner.training_job import TrainingJob, training_job_parser
 
-if __name__ == "__main__":
-    from algorithms.algorithm_types import Algorithm
-    from runner.training_job import TrainingJob, training_job_parser
 
-    args = training_job_parser.parse_args()
-    training_job = TrainingJob(**vars(args))
-
+def train(training_job: TrainingJob):
     print('Job:', training_job)
 
     from algorithms.algorithm_info import get_algo_vec_environment, get_algo_model
@@ -24,9 +20,9 @@ if __name__ == "__main__":
         exit()
 
     
+    
+    #name = f'{training_job.algo}'      
     model = None
-    name = f'{training_job.algo}'      
-
     
     from checkpoints.checkpoints_names import get_latest_checkpoint
 
@@ -45,7 +41,9 @@ if __name__ == "__main__":
     if model is None:
         print(f"Creating new checkpoint (algo={training_job.algo}, layers=({training_job.net_arch}))")
 
-        custom_architecture = dict(net_arch=training_job.net_arch)
+        custom_architecture = dict(
+            net_arch=training_job.net_arch
+        )
 
         model = ModelClass(
             'MultiInputPolicy',
@@ -54,7 +52,7 @@ if __name__ == "__main__":
 
             learning_rate=training_job.lr,
             gamma=training_job.discount_factor,
-            n_steps=int(training_job.batch_steps / training_job.parallel_env),        
+                    
 
             seed=training_job.seed,
             device=training_job.device,
@@ -101,3 +99,10 @@ if __name__ == "__main__":
     model.save(next_checkpoint_save)
     
     print(f"Saved model {next_checkpoint_save}")
+
+
+if __name__ == "__main__":
+    args = training_job_parser.parse_args()
+    training_job = TrainingJob(**vars(args))
+
+    train(training_job=training_job)
