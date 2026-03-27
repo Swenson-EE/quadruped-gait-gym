@@ -18,7 +18,8 @@ class TrainedModel:
 if __name__ == "__main__":
     trained_model = TrainedModel(
         algo=Algorithm.PPO_C,
-        net_arch=[64]*4
+        net_arch=[64]*4,
+        n=None
     )
     
 

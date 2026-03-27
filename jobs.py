@@ -1,12 +1,38 @@
+from algorithms.algorithm_types import Algorithm
 from runner.training_job import TrainingJob
 
 
 run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
 
-parallel_env=16
-steps = 1e6
+parallel_env=8
+steps=1e5
+seed = 10
+discount_factor = 0.99
+learning_rate = 1e-3
+rec_freq = 5
+num_checkpoints = 1
 
-jobs: list[TrainingJob] = [
-    TrainingJob(algo="ppo_c", total_steps=int(steps), parallel_env=parallel_env) for _ in range(5)
-]
+network_architecture = [64]*4
+
+
+training_jobs = {
+    algorithm: [
+        TrainingJob(
+            algo=algorithm.value,
+            total_steps=int(steps),
+            parallel_env=parallel_env,
+            seed=seed,
+
+            recording_frequency=rec_freq,
+
+            net_arch=network_architecture,
+
+            lr=learning_rate,
+            discount_factor=discount_factor
+        ) for _ in range(num_checkpoints)
+    ] for algorithm in Algorithm
+}
+
+
+jobs: list[TrainingJob] = training_jobs[Algorithm.PPO_C] 

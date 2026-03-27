@@ -20,7 +20,7 @@ class TrainingJob:
     batch_steps: int = 2048
     
     device: str = 'cpu' # 'cuda' for gpu, and 'cpu' for cpu
-    recording_frequency: int = 50
+    recording_frequency: int = 10
     verbose: int = 0
     
     
