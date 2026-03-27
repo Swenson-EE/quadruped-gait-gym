@@ -1,7 +1,7 @@
 import pandas as pd
 from stable_baselines3.common.callbacks import BaseCallback
 
-from loggers.base_logger import BaseLogger
+from loggers.base.base_logger import BaseLogger
 
 class MultiLoggerCallback(BaseCallback):
     def __init__(self, name, algo, loggers: list[BaseLogger], verbose=0):

@@ -1,5 +1,5 @@
 #from loggers.periodic_logger import PeriodicLogger
-from loggers.periodic_average_logger import PeriodicAverageLogger
+from loggers.base.periodic_average_logger import PeriodicAverageLogger
 
 class RewardLogger(PeriodicAverageLogger):
     def __init__(self, log_frequency=10):

@@ -1,4 +1,4 @@
-from loggers.periodic_logger import PeriodicLogger
+from loggers.base.periodic_logger import PeriodicLogger
 
 
 class PeriodicAverageLogger(PeriodicLogger):

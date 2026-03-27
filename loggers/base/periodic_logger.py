@@ -1,6 +1,6 @@
 import pandas as pd
 
-from loggers.base_logger import BaseLogger
+from loggers.base.base_logger import BaseLogger
 import numpy as np
 
 class PeriodicLogger(BaseLogger):
