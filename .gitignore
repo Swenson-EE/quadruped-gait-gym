@@ -4,5 +4,8 @@ __pycache__/
 # All saved models and data is in the saved directory
 saved/
 
+# Config files
+scheduler_config.json
+
 # TEMPORARY: Until ready to work on runtime environment
 runtime/ 
