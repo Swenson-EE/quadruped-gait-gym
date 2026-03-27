@@ -3,6 +3,7 @@ import time
 
 import mujoco.viewer
 
+from runner.training_parser import build_parser_from_dataclass
 from shared.algorithm.algorithm_info import get_algo_environment, get_algo_model
 from shared.algorithm.algorithm_types import Algorithm
 from checkpoints.checkpoints_names import get_checkpoint, get_latest_checkpoint
@@ -16,11 +17,10 @@ class TrainedModel:
 
 
 if __name__ == "__main__":
-    trained_model = TrainedModel(
-        algo=Algorithm.PPO_C,
-        net_arch=[64]*4,
-        n=None
-    )
+    trained_model_parser = build_parser_from_dataclass(TrainedModel)
+    args = trained_model_parser.parse_args()
+
+    trained_model = TrainedModel(**vars(args))
     
 
     checkpoint_name: str = None
