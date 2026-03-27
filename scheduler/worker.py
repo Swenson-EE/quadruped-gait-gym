@@ -4,7 +4,7 @@ from scheduler.base import SchedulerConfig
 from scheduler.manager import QueueManager, job_queue, shutdown_flag
 
 from train import train
-
+from runner.process_factory import ProcessFactory
 
 
 
@@ -14,6 +14,8 @@ def train_job(job):
     #time.sleep(1)
 
 def worker_loop(queue):
+    factory = ProcessFactory(script='train.py')
+
     print("Worker started...")
     while not shutdown_flag.is_set():
         try:
@@ -22,7 +24,7 @@ def worker_loop(queue):
             continue    # no job, loop again
         
         print(f"[START] {job}")
-        train_job(job)
+        factory.run(job, blocking=True)
         print(f"[DONE] {job}")
 
     print("Shutdown requested, stopping server.")
