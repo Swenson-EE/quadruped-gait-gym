@@ -4,7 +4,8 @@ from typing import TypeVar, Generic
 import gymnasium as gym
 import numpy as np
 
-from parameters import rewards
+#from parameters import rewards
+from shared.rewards.rewards import Rewards
 from simulator.bittle_sim import BittleParameters, BittleSimulator
 
 
@@ -23,10 +24,11 @@ T = TypeVar("T", bound=EnvironmentParameters)
 
 class BaseBittleEnvironment(gym.Env, Generic[T]):
 
-    def __init__(self, parameters: T = EnvironmentParameters()):
+    def __init__(self, parameters: T = EnvironmentParameters(), rewards: Rewards = Rewards()):
         super().__init__()
 
         self.params = parameters
+        self.rewards = rewards
 
         bittle_params = BittleParameters(
             model_path="model/bittle_mujoco.xml"
@@ -37,7 +39,6 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         self.step_count = 0
         self.total_session_step_count = 0
-
 
         self.history_id = 0
         self.joint_history = np.zeros((self.params.length_joint_history, self.sim.NUM_JOINTS))
@@ -64,7 +65,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         
 
     def step(self, action):
+        #print('action:', action)
         decoded_action = self.decode_action(action)
+        # print('decoded:', decoded_action)
 
         self.last_position = self.sim.get_position()
         self.initial_rotation = self.sim.get_rotation_matrix()
@@ -100,6 +103,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             truncated = False
 
         # print('Observation (step):', observation)
+        # print('moving:', self.sim.is_moving())
 
         return observation, total_reward, terminated, truncated, info
     
@@ -115,6 +119,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             "accel": imu_accel
         }
 
+    def get_reward_components(self):
+        pass
     
     def get_reward(self):
         current_position = self.sim.get_position()
@@ -123,38 +129,51 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         # Calculate movement reward and penalty
         position_delta = current_position - self.last_position
         local_position_delta = self.initial_rotation @ position_delta
+        
 
-        movement_reward = rewards.WT_Movement * local_position_delta[0]
-        movement_penalty = rewards.WT_Movement * abs(local_position_delta[1])
+        movement_reward = self.rewards.WT_Movement * local_position_delta[0]
+        movement_penalty = self.rewards.WT_LateralMovement * abs(local_position_delta[1])
 
-        velocity_reward = rewards.WT_Velocity * velocity[0]
-        velocity_penalty = rewards.WT_Velocity * abs(velocity[1])
+        #velocity_reward = self.rewards.WT_Velocity * velocity[0]
+        velocity_penalty = self.rewards.WT_Velocity * abs(velocity[1])
+
+        progress_penalty = 0
+        if local_position_delta[0] < 0.001:
+            progress_penalty = 0.02
+        
+
 
         # Calculate joint jitter penalty
         jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
-        smooth_movement_penalty = rewards.WT_Smooth * np.sum(jitter_1st_order**2 + jitter_2nd_order**2)
+        smooth_movement_penalty = self.rewards.WT_Smooth * np.sum(jitter_1st_order**2 + jitter_2nd_order**2)
 
 
         # Calculate clearance penalty
         paw_clearance = self.sim.get_feet_z()
-        clearance_penalty = rewards.WT_Clearance * sum( [max(0, foot_z - rewards.PAW_Z_THRESHOLD) for foot_z in paw_clearance.values()] )
+        clearance_penalty = self.rewards.WT_Clearance * sum( [max(0, foot_z - self.rewards.PAW_Z_THRESHOLD) for foot_z in paw_clearance.values()] )
 
         # Calculate crawling penalty
         num_arms_contacting = self.sim.get_num_contacting_arms()
-        crawling_penalty = rewards.WT_Crawl * num_arms_contacting
+        crawling_penalty = self.rewards.WT_Crawl * num_arms_contacting
 
         # Calculate tilt penalty
         roll, pitch = self.sim.get_tilt()
         imu_gyro = self.sim.get_sensor(self.sim.params.sensor_gyro)
         
-        stability_angle_penalty = rewards.WT_Instability * (roll**2 + pitch**2)
-        stability_rate_penalty = rewards.WT_Instability * (imu_gyro[0]**2 + imu_gyro[1]**2)
-        z_bounce_penalty = rewards.WT_Instability * rewards.WT_Bouncing * np.abs(velocity[2])
+        stability_angle_penalty = self.rewards.WT_Instability * (roll**2 + pitch**2)
+        stability_rate_penalty = self.rewards.WT_Instability * (imu_gyro[0]**2 + imu_gyro[1]**2)
+        z_bounce_penalty = self.rewards.WT_Instability * self.rewards.WT_Bouncing * np.abs(velocity[2])
         
+        # Calculate inactivity penalty
+        inactive_penalty = 0
+        if not self.sim.is_moving():
+            inactive_penalty = self.rewards.WT_Inactive
+        
+
 
         reward = {
             'movement': movement_reward,
-            'velocity': velocity_reward,
+            #'velocity': velocity_reward,
         }
 
         penalty = {
@@ -165,7 +184,10 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             'crawling': crawling_penalty,
             'stability_angle': stability_angle_penalty,
             'stability_rate': stability_rate_penalty,
-            'z_bounce': z_bounce_penalty
+            'z_bounce': z_bounce_penalty,
+            'living': self.rewards.WT_Living,
+            'inactive': inactive_penalty,
+            'progress': progress_penalty
         }
 
         return reward, penalty
