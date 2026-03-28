@@ -1,3 +1,4 @@
+from loggers.components_logger import ComponentsLogger
 from runner.training_job import TrainingJob, training_job_parser
 
 from shared.training.training_status import TrainingStatus
@@ -87,6 +88,9 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
                     log_frequency=training_job.recording_frequency
                 ),
                 ObservationLogger(
+                    log_frequency=training_job.recording_frequency
+                ),
+                ComponentsLogger(
                     log_frequency=training_job.recording_frequency
                 )
             ],
