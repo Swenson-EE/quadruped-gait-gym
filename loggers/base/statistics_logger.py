@@ -4,15 +4,11 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from loggers.base.periodic_logger import PeriodicLogger, PeriodicLoggerParameters
+from shared.data.stats import Statistics
 
 
 
 
-class Statistics(str, Enum):
-    MEAN = 'mean'
-    STD = 'std'
-    MIN = 'min'
-    MAX = 'max'
     
 
 @dataclass

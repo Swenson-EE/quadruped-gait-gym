@@ -1,4 +1,5 @@
-from loggers.base.statistics_logger import StatisticsLogger, StatisticsLoggerParameters, Statistics
+from loggers.base.statistics_logger import StatisticsLogger, StatisticsLoggerParameters
+from shared.data.stats import Statistics
 
 
 class ComponentsLogger(StatisticsLogger):
