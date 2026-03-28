@@ -15,7 +15,6 @@ class ComponentsLogger(StatisticsLogger):
                 ]
             },
             stats_to_track=[
-                Statistics.AVG,
                 Statistics.MEAN,
                 Statistics.STD,
                 Statistics.MIN,

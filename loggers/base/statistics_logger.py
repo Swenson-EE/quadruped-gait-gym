@@ -9,7 +9,6 @@ from loggers.base.periodic_logger import PeriodicLogger, PeriodicLoggerParameter
 
 
 class Statistics(str, Enum):
-    AVG = 'avg'
     MEAN = 'mean'
     STD = 'std'
     MIN = 'min'
@@ -30,8 +29,6 @@ class StatisticsLogger(PeriodicLogger[StatisticsLoggerParameters]):
         results = []
         for stat in self.params.stats_to_track:
             match stat:
-                case Statistics.AVG:
-                    value = np.average(values, axis=0)
                 case Statistics.MEAN:
                     value = np.mean(values, axis=0)
                 case Statistics.STD:
