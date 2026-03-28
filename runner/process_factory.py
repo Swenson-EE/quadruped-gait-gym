@@ -6,13 +6,14 @@ from runner.training_job import TrainingJob
 
 
 class ProcessFactory:
-    def __init__(self, script="train.py"):
+    def __init__(self, script="shared.training.train"):
         self.script = script
         self.python_exec = sys.executable
 
     def build(self, job: TrainingJob):
         cmd = [
             self.python_exec,
+            "-m",
             self.script,
             *job.to_cli_args()
         ]

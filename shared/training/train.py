@@ -1,11 +1,16 @@
 from runner.training_job import TrainingJob, training_job_parser
 
 
+#from runtime.jobs.job import TrainingJob
+
+
+
+
 def train(training_job: TrainingJob):
-    print("----------------------------")
-    print('Training')
+    print("-" * 30)
+    print('[Training]\n')
     print(training_job)
-    print("----------------------------")
+    print("-" * 30)
 
     from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
     env = get_algo_vec_environment(training_job.algo, training_job.parallel_env)
@@ -22,9 +27,7 @@ def train(training_job: TrainingJob):
         print('No model instantiated')
         exit()
 
-    
-    
-    #name = f'{training_job.algo}'      
+          
     model = None
     
     from checkpoints.checkpoints_names import get_latest_checkpoint
