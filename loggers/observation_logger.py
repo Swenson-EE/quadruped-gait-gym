@@ -1,13 +1,22 @@
-from loggers.base.periodic_logger import PeriodicLogger, PeriodicLoggerParameters
+from loggers.base.periodic_average_logger import PeriodicAverageLogger
+from loggers.base.periodic_logger import PeriodicLoggerParameters
+from loggers.base.statistics_logger import StatisticsLogger, StatisticsLoggerParameters, Statistics
 
 
-class ObservationLogger(PeriodicLogger):
+class ObservationLogger(StatisticsLogger):
     def __init__(self, log_frequency=10):
-        super().__init__(params=PeriodicLoggerParameters(
+        super().__init__(params=StatisticsLoggerParameters(
             name="Observations",
             log_frequency=log_frequency,
             items_to_track={
                 'observation': ['gyro', 'accel']
-            }
+            },
+            stats_to_track=[
+                Statistics.AVG,
+                Statistics.MEAN,
+                Statistics.STD,
+                Statistics.MIN,
+                Statistics.MAX
+            ]
         ))
 
