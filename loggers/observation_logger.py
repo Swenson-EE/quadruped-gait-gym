@@ -11,7 +11,3 @@ class ObservationLogger(PeriodicLogger):
             }
         ))
 
-        # super().__init__("Observations", log_frequency=log_frequency, items_to_track={
-        #     'observation': ['gyro', 'accel']
-        # })
-

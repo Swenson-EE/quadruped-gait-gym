@@ -16,13 +16,9 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
     def __init__(self, params: U):
         super().__init__(params=params)
 
-        #self.log_frequency = log_frequency
-
         self.episode_counts = None
         self.is_recording = None
         self.current_episodes = None
-
-        #self.items_to_track = items_to_track
 
         self.finished_episodes = {}
 

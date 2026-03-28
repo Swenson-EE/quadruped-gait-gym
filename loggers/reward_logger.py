@@ -4,12 +4,6 @@ from loggers.base.periodic_logger import PeriodicLoggerParameters
 
 class RewardLogger(PeriodicAverageLogger):
     def __init__(self, log_frequency=10):
-        #parameters = 
-
-        # super().__init__("Rewards", log_frequency=log_frequency, items_to_track={
-        #     'reward': ['movement', 'velocity'],
-        #     'penalty': ['movement', 'velocity', 'smooth', 'clearance', 'crawling', 'stability_angle', 'stability_rate', 'z_bounce']
-        # })
         super().__init__(params=PeriodicLoggerParameters(
             name="Rewards",
             log_frequency=log_frequency,
