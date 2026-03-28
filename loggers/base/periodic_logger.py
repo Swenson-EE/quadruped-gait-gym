@@ -63,7 +63,6 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
             self.is_recording[env_id] = True
 
     def on_training_end(self):
-        # Average across envs per episode
         rows = []
         for ep_num in sorted(self.finished_episodes.keys()):
             env_dicts = self.finished_episodes[ep_num]
@@ -71,16 +70,21 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
 
             for main_key, sub_keys in self.params.items_to_track.items():
                 for sub_key in sub_keys:
-                    ep_row[f"{main_key}_{sub_key}"] = self.row_operation(
+                    columns = self.row_operation(
+                        name=f"{main_key}_{sub_key}", 
                         values=[d[main_key][sub_key] for d in env_dicts], 
                         length=len(env_dicts)
                     )
-            
+                    
+                    for (name, value) in columns:
+                        ep_row[name] = value
+
+
             rows.append(ep_row)
 
         return pd.DataFrame(rows)
     
-    def row_operation(self, values, length):
-        return 0
+    def row_operation(self, name, values, length) -> list[tuple[str, float]]:
+        return []
 
 
