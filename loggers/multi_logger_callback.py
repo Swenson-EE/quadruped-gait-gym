@@ -52,4 +52,4 @@ class MultiLoggerCallback(BaseCallback):
             with pd.ExcelWriter(excel_path) as writer:
                 for logger in self.loggers:
                     df = logger.on_training_end()
-                    df.to_excel(writer, sheet_name=logger.name, index=False)
+                    df.to_excel(writer, sheet_name=logger.get_name(), index=False)

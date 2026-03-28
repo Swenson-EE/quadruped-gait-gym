@@ -5,7 +5,7 @@ run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
 
 parallel_env=8
-steps=1e5
+steps=1e4
 seed = 10
 discount_factor = 0.99
 learning_rate = 1e-3
@@ -34,4 +34,4 @@ training_jobs = {
 }
 
 
-jobs: list[TrainingJob] = training_jobs[Algorithm.PPO_C] 
+jobs: list[TrainingJob] = training_jobs[Algorithm.DDPG] 
