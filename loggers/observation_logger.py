@@ -1,5 +1,3 @@
-from loggers.base.periodic_average_logger import PeriodicAverageLogger
-from loggers.base.periodic_logger import PeriodicLoggerParameters
 from loggers.base.statistics_logger import StatisticsLogger, StatisticsLoggerParameters, Statistics
 
 

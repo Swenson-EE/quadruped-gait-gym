@@ -13,7 +13,7 @@ class RewardComponents:
     imu_gyro: np.ndarray
     imu_accel: np.ndarray
 
-    paw_clearance: dict[int, np.float64]
+    paw_clearance: np.ndarray
     num_arms_contacting: int
     
     roll: np.float64
