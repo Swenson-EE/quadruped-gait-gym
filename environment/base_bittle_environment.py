@@ -40,17 +40,22 @@ class EnvironmentParameters:
         pitch=10.0
     )
 
+    rewards: Rewards = None
+
 
 T = TypeVar("T", bound=EnvironmentParameters)
 
 
 class BaseBittleEnvironment(gym.Env, Generic[T]):
 
-    def __init__(self, parameters: T = EnvironmentParameters(), rewards: Rewards = Rewards()):
+    def __init__(self, parameters: T = EnvironmentParameters()):
         super().__init__()
 
         self.params = parameters
-        self.rewards = rewards
+
+        if self.params.rewards is None:
+            self.params.rewards = Rewards.from_json_file('config/rewards.json')
+        
 
         bittle_params = BittleParameters(
             model_path="model/bittle_mujoco.xml"
@@ -62,6 +67,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         self.step_count = 0
         self.total_session_step_count = 0
 
+        self.total_distance_traveled = 0
+
         self.history_id = 0
         self.joint_history = np.zeros((self.params.length_joint_history, self.sim.NUM_JOINTS))
 
@@ -72,7 +79,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         self.history_id = 0
 
         self.step_count = 0
+        self.total_distance_traveled = 0
+
         self.sim.reset()
+        for _ in range(10):
+            self.sim.step()
 
         self.last_position = self.sim.context.kinematics.get_position().copy()
 
@@ -102,8 +113,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         observation = self.get_observation()
 
         components = self.get_reward_components()
-        normalized_components = normalize_reward_components(components, self.params.normalization_factors)
-        reward, penalty = self.get_reward(components=normalized_components)
+        #normalized_components = normalize_reward_components(components, self.params.normalization_factors)
+        reward, penalty = self.get_reward(components=components)
 
         info = self.get_info()
         info['reward'] = reward
@@ -133,6 +144,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         return observation, total_reward, terminated, truncated, info
     
+
+    @property
+    def rewards(self):
+        return self.params.rewards
+
 
     def get_observation(self):
         imu_gyro = self.sim.context.sensors.imu_gyro
@@ -184,8 +200,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         position_delta = components.position - self.last_position
         local_position_delta = self.sim.context.kinematics.world_to_local(position_delta)
 
+        self.total_distance_traveled += local_position_delta[0]
+
         movement_reward = self.rewards.WT_Movement * local_position_delta[0]
-        movement_penalty = self.rewards.WT_LateralMovement * abs(local_position_delta[1])
+        movement_penalty = self.rewards.WT_LateralMovement * (abs(local_position_delta[1]**2) + abs(local_position_delta[2]**2))
+
+        total_movement_reward = self.rewards.WT_Movement * self.total_distance_traveled
 
         #velocity_reward = self.rewards.WT_Velocity * components.velocity[0]
         velocity_penalty = self.rewards.WT_Velocity * abs(components.velocity[1])       
@@ -204,13 +224,14 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         # Calculate tilt penalty        
         stability_angle_penalty = self.rewards.WT_Instability * (components.roll**2 + components.pitch**2)
-        stability_rate_penalty = self.rewards.WT_Instability * (components.imu_gyro[0]**2 + components.imu_gyro[1]**2)
+        stability_rate_penalty = self.rewards.WT_InstabilityRate * (components.imu_gyro[0]**2 + components.imu_gyro[1]**2)
         z_bounce_penalty = self.rewards.WT_Instability * self.rewards.WT_Bouncing * np.abs(components.velocity[2])
         
         
 
         reward = {
             'movement': movement_reward,
+            'total_movement': total_movement_reward
             #'velocity': velocity_reward,
         }
 

@@ -41,8 +41,9 @@ class BittleSimulator:
         mujoco.mj_resetData(self.model, self.data)
         self.context.kinematics.update_rotation()
 
-    def step(self, action):
-        self.data.ctrl[:] = action
+    def step(self, action = None):
+        if action is not None:
+            self.data.ctrl[:] = action
 
         for _ in range(self.n_substeps): # Simulate control updates
             mujoco.mj_step(self.model, self.data)
