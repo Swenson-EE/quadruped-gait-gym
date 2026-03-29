@@ -1,4 +1,5 @@
 from shared.algorithm.algorithm_types import Algorithm
+from environment.base_bittle_environment import BaseBittleEnvironment, EnvironmentParameters
 
 def get_algo_model(algo: Algorithm):
     ModelClass = None
@@ -27,9 +28,7 @@ def get_algo_model(algo: Algorithm):
 
 
 
-def get_algo_environment(algo: Algorithm):
-    from environment.base_bittle_environment import BaseBittleEnvironment
-
+def get_algo_environment(algo: Algorithm, parameters: EnvironmentParameters = EnvironmentParameters()):
     env: BaseBittleEnvironment = None
 
     match algo:
@@ -39,7 +38,7 @@ def get_algo_environment(algo: Algorithm):
             print(f"Continuous algorithm ({algo})")
 
             # set up environment
-            env = ContinuousBittleEnvironment(ContinuousEnvironmentParameters())
+            env = ContinuousBittleEnvironment(parameters=parameters)
             
         case Algorithm.QLEARNING | Algorithm.PPO_D:
             
@@ -54,8 +53,8 @@ def get_algo_environment(algo: Algorithm):
 
 
 
-def get_algo_vec_environment(algo: Algorithm, parallel_env: int):
-    from environment.base_bittle_environment import BaseBittleEnvironment
+def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: EnvironmentParameters = EnvironmentParameters()):
+
     
     env: BaseBittleEnvironment = None
     
@@ -70,7 +69,7 @@ def get_algo_vec_environment(algo: Algorithm, parallel_env: int):
 
             # set up environment
             env = make_vec_env(
-                lambda: ContinuousBittleEnvironment(ContinuousEnvironmentParameters()),
+                lambda: ContinuousBittleEnvironment(parameters=parameters),
                 n_envs=parallel_env,
                 vec_env_cls=SubprocVecEnv
             )
