@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import mujoco
 import numpy as np
 
-from simulator.core import RobotState
+from simulator.state import RobotState
 
 
 @dataclass

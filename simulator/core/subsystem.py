@@ -1,6 +1,7 @@
 import mujoco
+from abc import ABC
 
-class RobotSubsystem:
+class RobotSubsystem(ABC):
     def __init__(self, context: "SimulationContext"):
         self.context = context
 
