@@ -45,6 +45,7 @@
                     <geom name="front_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
 
                     <geom name="front_left_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                    <site name="front_left_foot_site" pos="0 0 -0.10" size="0.005"/>
                 </body>
             </body>
 
@@ -60,6 +61,7 @@
                     <geom name="front_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
 
                     <geom name="front_right_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                    <site name="front_right_foot_site" pos="0 0 -0.10" size="0.005"/>
                 </body>
             </body>
 
@@ -75,6 +77,7 @@
                     <geom name="back_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
 
                     <geom name="back_left_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                    <site name="back_left_foot_site" pos="0 0 -0.10" size="0.005"/>
                 </body>
             </body>
 
@@ -90,6 +93,7 @@
                     <geom name="back_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
 
                     <geom name="back_right_foot" type="sphere" pos="0 0 -0.10" size="0.025"/>
+                    <site name="back_right_foot_site" pos="0 0 -0.10" size="0.005"/>
                 </body>
             </body>
         </body>
