@@ -1,6 +1,6 @@
 import mujoco
 
-from .subsystem import RobotSubsystem
+from ..core.subsystem import RobotSubsystem
 
 
 class Sensors(RobotSubsystem):

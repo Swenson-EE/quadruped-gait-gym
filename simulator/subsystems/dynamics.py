@@ -1,7 +1,7 @@
 import mujoco
 import numpy as np
 
-from .subsystem import RobotSubsystem
+from ..core.subsystem import RobotSubsystem
 
 class Dynamics(RobotSubsystem):
     """

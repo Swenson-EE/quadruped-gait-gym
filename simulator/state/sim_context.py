@@ -1,11 +1,11 @@
 import mujoco
 from .robot_info import RobotInfo
 
-from .kinematics import Kinematics
-from .contacts import Contacts
-from .dynamics import Dynamics
-from .sensors import Sensors
-from .locomotion_metrics import LocomotionMetrics
+from ..subsystems.kinematics import Kinematics
+from ..subsystems.contacts import Contacts
+from ..subsystems.dynamics import Dynamics
+from ..subsystems.sensors import Sensors
+from ..subsystems.locomotion_metrics import LocomotionMetrics
 
 
 class SimulationContext:

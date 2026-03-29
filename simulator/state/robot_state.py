@@ -1,6 +1,6 @@
 import mujoco
 
-from simulator.core.sim_context import SimulationContext
+from simulator.state.sim_context import SimulationContext
 
 
 class RobotState:

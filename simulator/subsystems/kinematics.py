@@ -5,7 +5,7 @@ from mujoco import MjModel, MjData
 
 import numpy as np
 
-from .subsystem import RobotSubsystem
+from ..core.subsystem import RobotSubsystem
 
 
 class Kinematics(RobotSubsystem):
