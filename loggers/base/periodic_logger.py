@@ -8,7 +8,7 @@ from loggers.base.base_logger import BaseLogger, LoggerParameters
 @dataclass
 class PeriodicLoggerParameters(LoggerParameters):
     log_frequency: int = 10
-    items_to_track: dict = field(default_factory=dict)
+    items_to_track: list = field(default_factory=list)
 
 U = TypeVar("U", bound=PeriodicLoggerParameters)
 
@@ -29,16 +29,21 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
         self.current_episodes = []
         for _ in range(num_envs):
             environment_dict = {}
-            for main_key, sub_keys in self.params.items_to_track.items():
-                environment_dict[main_key] = {k: 0 for k in sub_keys}
+            for main_key in self.params.items_to_track:
+                environment_dict[main_key] = {}
             self.current_episodes.append(environment_dict)
 
     def on_step(self, env_id, action, info, done):
         if self.is_recording[env_id] and info is not None:
-                for main_key, sub_keys in self.params.items_to_track.items():
+                for main_key in self.params.items_to_track:
                     sub_dict = info.get(main_key, {})
-                    for sub_key in sub_keys:
+                    for sub_key in sub_dict.keys():
+                        if sub_key not in self.current_episodes[env_id][main_key]:
+                            self.current_episodes[env_id][main_key][sub_key] = 0
+
+
                         self.current_episodes[env_id][main_key][sub_key] += sub_dict.get(sub_key, 0)
+                    
 
     def on_episode_end(self, env_id, ep_num):
 
@@ -53,9 +58,11 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
             )
 
             # Reset
-            for main_key, sub_keys in self.params.items_to_track.items():
-                for sub_key in sub_keys:
+            for main_key in self.params.items_to_track:
+                sub_dict = self.current_episodes[env_id].get(main_key, {})
+                for sub_key in sub_dict.keys():
                     self.current_episodes[env_id][main_key][sub_key] = 0
+
             self.is_recording[env_id] = False
         
         # Decide if next episode should be recorded
@@ -68,7 +75,11 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
             env_dicts = self.finished_episodes[ep_num]
             ep_row = {"episode": ep_num}
 
-            for main_key, sub_keys in self.params.items_to_track.items():
+            for main_key in self.params.items_to_track:
+                sub_keys = set()
+                for d in env_dicts:
+                    sub_keys.update(d.get(main_key, {}.keys()))
+
                 for sub_key in sub_keys:
                     columns = self.row_operation(
                         name=f"{main_key}_{sub_key}", 
@@ -78,7 +89,6 @@ class PeriodicLogger(BaseLogger[U], Generic[U]):
                     
                     for (name, value) in columns:
                         ep_row[name] = value
-
 
             rows.append(ep_row)
 

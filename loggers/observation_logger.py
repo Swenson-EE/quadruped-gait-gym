@@ -6,11 +6,8 @@ class ObservationLogger(StatisticsLogger):
         super().__init__(params=StatisticsLoggerParameters(
             name="Observations",
             log_frequency=log_frequency,
-            items_to_track={
-                'observation': ['gyro', 'accel']
-            },
+            items_to_track=['observation'],
             stats_to_track=[
-                Statistics.AVG,
                 Statistics.MEAN,
                 Statistics.STD,
                 Statistics.MIN,

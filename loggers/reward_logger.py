@@ -7,9 +7,6 @@ class RewardLogger(PeriodicAverageLogger):
         super().__init__(params=PeriodicLoggerParameters(
             name="Rewards",
             log_frequency=log_frequency,
-            items_to_track={
-                'reward': ['movement', 'velocity'],
-                'penalty': ['movement', 'velocity', 'smooth', 'clearance', 'crawling', 'stability_angle', 'stability_rate', 'z_bounce']
-            }
+            items_to_track=['reward', 'penalty']
         ))
 
