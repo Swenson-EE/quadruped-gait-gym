@@ -1,3 +1,4 @@
+from environment.base_bittle_environment import EnvironmentParameters
 from loggers.components_logger import ComponentsLogger
 from runner.training_job import TrainingJob, training_job_parser
 
@@ -14,7 +15,9 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         print("-" * 30)
 
         from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
-        env = get_algo_vec_environment(training_job.algo, training_job.parallel_env)
+        env = get_algo_vec_environment(training_job.algo, training_job.parallel_env, parameters=EnvironmentParameters(
+            total_length=training_job.total_steps
+        ))
         if env is None:
             return (TrainingStatus.NO_ENV, "No environment instantiated")
         
@@ -108,6 +111,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         
         print(f"Saved model {next_checkpoint_save}")
     except Exception as e:
+        print('Error:', e)
         return (TrainingStatus.ERROR, e)
     
     return (TrainingStatus.SUCCESS, 'success')

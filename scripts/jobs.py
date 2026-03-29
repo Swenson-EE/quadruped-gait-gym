@@ -4,12 +4,12 @@ from runner.training_job import TrainingJob
 run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
 
-parallel_env=8
+parallel_env=1
 steps=1e4
 seed = 10
 discount_factor = 0.99
 learning_rate = 1e-3
-rec_freq = 5
+rec_freq = 1
 num_checkpoints = 1
 
 network_architecture = [64]*4

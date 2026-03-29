@@ -17,7 +17,7 @@ class TrainingJob:
     
     seed: int = 42
     parallel_env: int = 8
-    total_steps: int = 1e6
+    total_steps: int = 1e4
     batch_steps: int = 2048
     
     device: str = 'cpu' # 'cuda' for gpu, and 'cpu' for cpu
