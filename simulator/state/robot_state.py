@@ -1,6 +1,7 @@
 import mujoco
 
 from simulator.state.sim_context import SimulationContext
+from simulator.controllers import RandomizationController
 
 
 class RobotState:
@@ -9,4 +10,9 @@ class RobotState:
         self.data = data
 
         self.context = SimulationContext(self.model, self.data)
+
+        self.randomization = RandomizationController(modules=[
+            
+        ])
+
 

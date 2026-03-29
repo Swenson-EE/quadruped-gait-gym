@@ -75,17 +75,23 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
 
     def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
+
         self.joint_history = np.zeros((self.params.length_joint_history, self.sim.NUM_JOINTS))
         self.history_id = 0
 
         self.step_count = 0
         self.total_distance_traveled = 0
+        self.last_position = np.zeros(3)
 
         self.sim.reset()
+
+        self.sim.robot_state.randomization.apply(self.np_random)
+
         for _ in range(10):
             self.sim.step()
 
-        self.last_position = self.sim.context.kinematics.get_position().copy()
+        
 
         observation = self.get_observation()
         info = {}
