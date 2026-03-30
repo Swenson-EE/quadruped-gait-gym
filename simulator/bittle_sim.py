@@ -39,7 +39,7 @@ class BittleSimulator:
 
     def reset(self):
         mujoco.mj_resetData(self.model, self.data)
-        self.context.kinematics.update_rotation()
+        self.context.kinematics.basis.update_rotation()
 
     def step(self, action = None):
         if action is not None:
@@ -48,12 +48,14 @@ class BittleSimulator:
         for _ in range(self.n_substeps): # Simulate control updates
             mujoco.mj_step(self.model, self.data)
 
-        self.context.kinematics.update_rotation()
+        self.context.kinematics.basis.update_rotation()
 
+    def forward(self):
+        mujoco.mj_forward(self.model, self.data)
     
             
-    def get_joint_angles(self):
-        return np.rad2deg([
-            self.data.qpos[joint_id] for joint_id in self.context.robot_info.joint_qpos_ids
-        ]).astype(int)
+    # def get_joint_angles(self):
+    #     return np.rad2deg([
+    #         self.data.qpos[joint_id] for joint_id in self.context.robot_info.joint_qpos_ids
+    #     ]).astype(int)
 

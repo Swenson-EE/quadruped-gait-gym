@@ -86,10 +86,17 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         self.sim.reset()
 
-        self.sim.robot_state.randomization.apply(self.np_random)
 
-        for _ in range(10):
-            self.sim.step()
+        
+
+        self.sim.robot_state.randomization.apply(self.np_random)
+        self.sim.forward()
+
+        self.sim.data.qpos[2] -= np.min(self.sim.context.kinematics.foot.paw_clearance())
+        self.sim.data.qvel = 0
+
+        self.sim.forward()
+             
 
         
 
@@ -106,13 +113,13 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def step(self, action):
         #print('action:', action)
         decoded_action = self.decode_action(action)
-        # print('decoded:', decoded_action)
+        #print('decoded:', decoded_action)
 
-        self.last_position = self.sim.context.kinematics.get_position().copy()
+        self.last_position = self.sim.context.kinematics.world.get_position().copy()
 
         self.sim.step(decoded_action)
-
-        joint_angles = self.sim.get_joint_angles()
+        
+        joint_angles = self.sim.context.kinematics.joint.get_angles()
         self.update_joint_history(joint_angles)
         
         
@@ -169,19 +176,22 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         }
 
     def get_reward_components(self) -> RewardComponents:
-        position = self.sim.context.kinematics.get_position()
-        velocity = self.sim.context.kinematics.world_to_local(self.sim.context.kinematics.get_velocity())
+        position = self.sim.context.kinematics.world.get_position()
+        velocity = self.sim.context.kinematics.basis.world_to_local(self.sim.context.kinematics.world.get_velocity())
 
         jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
 
         imu_gyro = self.sim.context.sensors.imu_gyro
         imu_accel = self.sim.context.sensors.imu_accel
 
-        paw_clearance = self.sim.context.metrics.paw_clearance()
-        paw_slipping, num_paws_contacting = self.sim.context.metrics.paw_slipping()
+        paw_clearance = self.sim.context.kinematics.foot.paw_clearance()
+        paw_slipping, num_paws_contacting = self.sim.context.kinematics.foot.paw_slipping()
         num_arms_contacting = len(self.sim.context.contacts.contacting_geoms(self.sim.context.robot_info.arm_geom_ids))
 
-        roll, pitch = self.sim.context.kinematics.get_tilt()
+        roll, pitch = self.sim.context.kinematics.basis.get_tilt()
+
+        joint_variance = np.var(self.get_joint_obs()[-10:], axis=0)
+        
 
         return RewardComponents(
             position=position,
@@ -199,13 +209,15 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             num_paws_contacting=num_paws_contacting,
 
             roll=roll,
-            pitch=pitch
+            pitch=pitch,
+
+            joint_variance=joint_variance
         )
     
     def get_reward(self, components: RewardComponents):
         # Calculate movement reward and penalty
         position_delta = components.position - self.last_position
-        local_position_delta = self.sim.context.kinematics.world_to_local(position_delta)
+        local_position_delta = self.sim.context.kinematics.basis.world_to_local(position_delta)
 
         self.total_distance_traveled += local_position_delta[0]
 
@@ -237,7 +249,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         stability_rate_penalty = self.rewards.WT_InstabilityRate * (components.imu_gyro[0]**2 + components.imu_gyro[1]**2)
         z_bounce_penalty = self.rewards.WT_Instability * self.rewards.WT_Bouncing * np.abs(components.velocity[2])
         
-        
+        # Calculate stagnation penalty
+        stagnation_penalty = 100 * sum(components.joint_variance < np.deg2rad(10))
+        #print('stagnation:', stagnation_penalty)
 
         reward = {
             'movement': movement_reward,
@@ -257,7 +271,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             'z_bounce': z_bounce_penalty,
             'living': self.rewards.WT_Living,
             'steps': self.total_session_step_count / self.params.total_length,
-            'paw_contact': paw_contact_penalty
+            'paw_contact': paw_contact_penalty,
+            'stagnation': stagnation_penalty
         }
 
         return reward, penalty

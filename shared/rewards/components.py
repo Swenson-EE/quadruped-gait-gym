@@ -21,6 +21,8 @@ class RewardComponents:
     roll: np.float64
     pitch: np.float64
 
+    joint_variance: int
+
 
 @dataclass
 class RewardNormalizationFactors:

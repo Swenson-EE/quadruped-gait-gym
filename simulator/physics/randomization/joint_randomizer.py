@@ -13,6 +13,6 @@ class JointRandomizer(RandomizationSubsystem):
             size=len(self.joint_qpos_ids)
         )
         
-        self.context.data.qpos[self.joint_qpos_ids] = np.deg2rad(random_joint_angles_deg)
+        self.context.kinematics.joint.set_angles(np.deg2rad(random_joint_angles_deg))
 
 
