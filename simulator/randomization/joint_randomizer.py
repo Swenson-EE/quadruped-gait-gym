@@ -2,8 +2,8 @@ from simulator.physics.core import RandomizationSubsystem
 import numpy as np
 
 class JointRandomizer(RandomizationSubsystem):
-    def __init__(self, context, joint_qpos_ids, noise=(-15, 15)):
-        super().__init__(context)
+    def __init__(self, sim, joint_qpos_ids, noise=(-15, 15)):
+        super().__init__(sim)
         self.joint_qpos_ids = joint_qpos_ids
         self.noise = noise
 

@@ -4,6 +4,8 @@ import mujoco
 import numpy as np
 
 from simulator.physics.state import PhysicsState
+from simulator.controllers import RandomizationController
+import simulator.randomization as s_rnd
 
 
 @dataclass
@@ -30,12 +32,21 @@ class BittleSimulator:
 
         self.n_substeps = int(parameters.control_dt / self.model.opt.timestep)      # The number of substeps to take in a single physics step to simulate control delay
 
-        self.robot_state = PhysicsState(self.model, self.data)
+        self.phys_state = PhysicsState(self.model, self.data)
+        self.randomization = RandomizationController(modules=[
+            s_rnd.InitialPoseRandomizer(
+                sim=self
+            ),
+            s_rnd.JointRandomizer(
+                sim=self,
+                joint_qpos_ids=self.context.robot_info.joint_qpos_ids
+            )
+        ])
 
         
     @property
     def context(self):
-        return self.robot_state.context
+        return self.phys_state.context
 
     def reset(self):
         mujoco.mj_resetData(self.model, self.data)
@@ -53,9 +64,4 @@ class BittleSimulator:
     def forward(self):
         mujoco.mj_forward(self.model, self.data)
     
-            
-    # def get_joint_angles(self):
-    #     return np.rad2deg([
-    #         self.data.qpos[joint_id] for joint_id in self.context.robot_info.joint_qpos_ids
-    #     ]).astype(int)
 

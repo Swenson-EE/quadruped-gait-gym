@@ -89,7 +89,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         
 
-        self.sim.robot_state.randomization.apply(self.np_random)
+        self.sim.randomization.apply(self.np_random)
         self.sim.forward()
 
         self.sim.data.qpos[2] -= np.min(self.sim.context.kinematics.foot.paw_clearance())

@@ -8,8 +8,8 @@ class InitialPoseRandomizer(RandomizationSubsystem):
     rotation_range: (rad)
     """
 
-    def __init__(self, context, position_range=(-0.1, 0.1), rotation_range=(-0.2, 0.2)):
-        super().__init__(context)
+    def __init__(self, sim, position_range=(-0.1, 0.1), rotation_range=(-0.2, 0.2)):
+        super().__init__(sim)
 
         self.position_range = position_range
         self.rotation_range = rotation_range
