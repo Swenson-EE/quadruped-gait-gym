@@ -32,7 +32,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
             
         model = None
         
-        from checkpoints.checkpoints_names import get_latest_checkpoint
+        from shared.checkpoints.checkpoints_names import get_latest_checkpoint
 
         last_checkpoint = get_latest_checkpoint(
             algo=training_job.algo,
@@ -70,7 +70,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
 
         
 
-        from checkpoints.checkpoints_names import next_checkpoint
+        from shared.checkpoints.checkpoints_names import next_checkpoint
         next_checkpoint_save, trained_name = next_checkpoint(
             algo=training_job.algo,
             # Any additional metadata for checkpoint naming

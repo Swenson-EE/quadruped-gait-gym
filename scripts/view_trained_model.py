@@ -6,7 +6,7 @@ import mujoco.viewer
 from shared.utils.dataclass_parser import build_parser_from_dataclass
 from shared.algorithm.algorithm_info import get_algo_environment, get_algo_model
 from shared.algorithm.algorithm_types import Algorithm
-from checkpoints.checkpoints_names import get_checkpoint, get_latest_checkpoint
+from shared.checkpoints.checkpoints_names import get_checkpoint, get_latest_checkpoint
 
 
 @dataclass
