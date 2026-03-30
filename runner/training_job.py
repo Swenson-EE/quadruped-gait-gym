@@ -1,16 +1,17 @@
 from dataclasses import dataclass, asdict, field
 from enum import Enum
+import json
 
 from shared.algorithm.algorithm_types import Algorithm
-from runner.training_parser import build_parser_from_dataclass
+from runner.training_parser import build_parser_from_dataclass, parse_args_to_dataclass
 
 
 @dataclass
 class TrainingJob:
     algo: Algorithm = Algorithm.SAC
     
-    lr: float = 1e-4
-    discount_factor: float = 0.99
+    lr: float = 1e-3
+    discount_factor: float = 0.9
 
     net_arch: list[int] = field(default_factory=lambda: [64, 64, 64, 64])
     
@@ -42,5 +43,9 @@ class TrainingJob:
         
         return args
     
+    
+with open("config/training_job_defaults.json") as file:
+    job_defaults = json.load(file)
 
-training_job_parser = build_parser_from_dataclass(TrainingJob)
+
+training_job_parser = build_parser_from_dataclass(TrainingJob, job_defaults)

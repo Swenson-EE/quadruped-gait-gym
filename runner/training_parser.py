@@ -14,47 +14,69 @@ def str2bool(v):
         raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
-def build_parser_from_dataclass(dc):
+def build_parser_from_dataclass(dc, defaults: dict | None = None):
     assert is_dataclass(dc)
 
+    defaults = defaults or {}
     parser = argparse.ArgumentParser()
 
     for f in fields(dc):
         arg_name = f"--{f.name}"
 
-        # Use default_factory if it exists, else default, else None
-        if f.default_factory is not MISSING:  # type: ignore
+        field_type = f.type
+
+        # -----------------------------
+        # Resolve default priority
+        # defaults dict > dataclass default > factory > None
+        # -----------------------------
+        if f.name in defaults:
+            default = defaults[f.name]
+        elif f.default_factory is not MISSING:  # type: ignore
             default = f.default_factory()
         elif f.default is not MISSING:
             default = f.default
         else:
             default = None
 
-        field_type = f.type
         kwargs = {"default": default}
 
-        # Handle booleans with str2bool
+        # -----------------------------
+        # BOOL
+        # -----------------------------
         if field_type == bool:
             kwargs["type"] = str2bool
             kwargs["help"] = f"(boolean) default={default}"
 
-        # Handle Enums
-        elif isinstance(default, Enum) or (isinstance(field_type, type) and issubclass(field_type, Enum)):
+        # -----------------------------
+        # ENUM
+        # -----------------------------
+        elif isinstance(field_type, type) and issubclass(field_type, Enum):
             enum_cls = field_type
+
+            # Convert default string -> Enum if needed
+            if isinstance(default, str):
+                default = enum_cls(default)
+
             kwargs["type"] = enum_cls
             kwargs["choices"] = list(enum_cls)
+            kwargs["default"] = default
             kwargs["help"] = f"(enum) choices={[e.name for e in enum_cls]} default={default.name}"
 
-        # Handle List[int] (or generally List[some_type])
+        # -----------------------------
+        # LIST
+        # -----------------------------
         elif getattr(field_type, "__origin__", None) == list:
-            # Try to infer inner type
-            inner_type = int  # default to int if unspecified
+            inner_type = int
             if hasattr(field_type, "__args__") and len(field_type.__args__) == 1:
                 inner_type = field_type.__args__[0]
+
             kwargs["type"] = inner_type
             kwargs["nargs"] = "+"
             kwargs["help"] = f"(list) default={default}"
 
+        # -----------------------------
+        # STANDARD TYPES
+        # -----------------------------
         else:
             kwargs["type"] = field_type
             kwargs["help"] = f"default={default}"
@@ -68,15 +90,25 @@ def parse_args_to_dataclass(parser, dc_type):
     args = parser.parse_args()
     args_dict = vars(args)
 
-    # Ensure any missing values use dataclass defaults
     final_kwargs = {}
+
     for f in fields(dc_type):
-        if f.name in args_dict and args_dict[f.name] is not None:
-            final_kwargs[f.name] = args_dict[f.name]
+        value = args_dict.get(f.name, None)
+
+        if value is not None:
+            # Convert to Enum if needed
+            if isinstance(f.type, type) and issubclass(f.type, Enum):
+                if not isinstance(value, f.type):
+                    value = f.type(value)
+
+            final_kwargs[f.name] = value
+
         elif f.default_factory is not MISSING:  # type: ignore
             final_kwargs[f.name] = f.default_factory()
+
         elif f.default is not MISSING:
             final_kwargs[f.name] = f.default
+
         else:
             final_kwargs[f.name] = None
 

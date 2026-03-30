@@ -1,13 +1,12 @@
 from scheduler.base import SchedulerConfig
 from scheduler.manager import QueueManager
 
-from runner.training_job import TrainingJob, training_job_parser
+from runner.training_job import TrainingJob, training_job_parser, parse_args_to_dataclass
 
 
 if __name__ == "__main__":
 
-    args = training_job_parser.parse_args()
-    job = TrainingJob(**vars(args))
+    job = parse_args_to_dataclass(training_job_parser, TrainingJob)
 
     config = SchedulerConfig.from_json_file("scheduler_config.json")
 
