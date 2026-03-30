@@ -1,5 +1,4 @@
 from simulator.core import RandomizationSubsystem
-import numpy as np
 from scipy.spatial.transform import Rotation
 
 class InitialPoseRandomizer(RandomizationSubsystem):

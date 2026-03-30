@@ -54,6 +54,6 @@ class BittleSimulator:
             
     def get_joint_angles(self):
         return np.rad2deg([
-            self.data.qpos[joint_id] for joint_id in self.context.robot_info.joint_ids
+            self.data.qpos[joint_id] for joint_id in self.context.robot_info.joint_qpos_ids
         ]).astype(int)
 

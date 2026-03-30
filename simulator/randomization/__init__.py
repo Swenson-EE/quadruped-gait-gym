@@ -1,1 +1,2 @@
 from .initial_pose_randomizer import InitialPoseRandomizer
+from .joint_randomizer import JointRandomizer
