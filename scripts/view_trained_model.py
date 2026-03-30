@@ -16,6 +16,13 @@ class TrainedModel:
     n: int = None
 
 
+is_stopped = False
+def key_callback(keycode):
+    global is_stopped
+    if keycode == ord(' '):
+        is_stopped = False
+
+
 if __name__ == "__main__":
     trained_model_parser = build_parser_from_dataclass(TrainedModel)
     args = trained_model_parser.parse_args()
@@ -58,19 +65,25 @@ if __name__ == "__main__":
 
     model = ModelClass.load(checkpoint_name)
 
-    
-    with mujoco.viewer.launch_passive(env.sim.model, env.sim.data) as viewer:
+    is_stopped = False
+    with mujoco.viewer.launch_passive(env.sim.model, env.sim.data, key_callback=key_callback) as viewer:
         obs, info = env.reset()
 
         while viewer.is_running():
-            action, _states = model.predict(obs, deterministic=True)
-            obs, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
+            if not is_stopped:
 
-            time.sleep(0.01)
+                action, _states = model.predict(obs, deterministic=True)
+                obs, reward, terminated, truncated, info = env.step(action)
+                is_stopped = terminated or truncated
 
-            viewer.sync()
-    
+                time.sleep(0.01)
+
+                viewer.sync()
+
+                if is_stopped:
+                    obs, info = env.reset()
+            else:
+                print('stopped')
     
 
 
