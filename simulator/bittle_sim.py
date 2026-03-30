@@ -4,6 +4,7 @@ import mujoco
 import numpy as np
 
 from simulator.physics.state import PhysicsState
+from simulator.simulation import SimulationState
 from simulator.controllers import RandomizationController
 import simulator.randomization as s_rnd
 
@@ -33,6 +34,8 @@ class BittleSimulator:
         self.n_substeps = int(parameters.control_dt / self.model.opt.timestep)      # The number of substeps to take in a single physics step to simulate control delay
 
         self.phys_state = PhysicsState(self.model, self.data)
+        self.sim_state = SimulationState(self.model, self.data)
+
         self.randomization = RandomizationController(modules=[
             s_rnd.InitialPoseRandomizer(
                 sim=self

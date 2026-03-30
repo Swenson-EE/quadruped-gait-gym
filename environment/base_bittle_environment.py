@@ -77,8 +77,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.joint_history = np.zeros((self.params.length_joint_history, self.sim.NUM_JOINTS))
-        self.history_id = 0
+        self.sim.sim_state.joints.clear()
 
         self.step_count = 0
         self.total_distance_traveled = 0
@@ -111,16 +110,14 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         
 
     def step(self, action):
-        #print('action:', action)
         decoded_action = self.decode_action(action)
-        #print('decoded:', decoded_action)
 
         self.last_position = self.sim.context.kinematics.world.get_position().copy()
 
         self.sim.step(decoded_action)
         
         joint_angles = self.sim.context.kinematics.joint.get_angles()
-        self.update_joint_history(joint_angles)
+        self.sim.sim_state.joints.push_joint_angles(joint_angles)
         
         
         observation = self.get_observation()
@@ -167,7 +164,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         imu_gyro = self.sim.context.sensors.imu_gyro
         imu_accel = self.sim.context.sensors.imu_accel
 
-        joint_history = self.get_joint_obs()
+        joint_history = self.sim.sim_state.joints.get_ordered_history()
 
         return {
             "joint_history": joint_history,
@@ -179,7 +176,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         position = self.sim.context.kinematics.world.get_position()
         velocity = self.sim.context.kinematics.basis.world_to_local(self.sim.context.kinematics.world.get_velocity())
 
-        jitter_1st_order, jitter_2nd_order = self.get_joint_jitter()
+        jitter_1st_order, jitter_2nd_order = self.sim.sim_state.joints.get_jitter()
+        joint_variance = np.var(self.sim.sim_state.joints.get_ordered_history()[-10:], axis=0)
 
         imu_gyro = self.sim.context.sensors.imu_gyro
         imu_accel = self.sim.context.sensors.imu_accel
@@ -190,7 +188,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         roll, pitch = self.sim.context.kinematics.basis.get_tilt()
 
-        joint_variance = np.var(self.get_joint_obs()[-10:], axis=0)
+        #joint_variance = np.var(self.get_joint_obs()[-10:], axis=0)
         
 
         return RewardComponents(
@@ -283,32 +281,32 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def decode_action(self, action):
         return action
 
-    def get_joint_obs(self):
-        id = self.history_id
-        return np.roll(self.joint_history, -id, axis=0)
+    # def get_joint_obs(self):
+    #     id = self.history_id
+    #     return np.roll(self.joint_history, -id, axis=0)
 
     
-    def get_joint_history(self, n=0, units='rad'):
-        id = (self.history_id - n - 1) % self.params.length_joint_history
+    # def get_joint_history(self, n=0, units='rad'):
+    #     id = (self.history_id - n - 1) % self.params.length_joint_history
 
-        if units == 'rad':
-            return np.deg2rad(self.joint_history[id])
-        elif units == 'deg':
-            return self.joint_history[id]
-        else:
-            raise Exception("Unsupported units") # unsupported units
+    #     if units == 'rad':
+    #         return np.deg2rad(self.joint_history[id])
+    #     elif units == 'deg':
+    #         return self.joint_history[id]
+    #     else:
+    #         raise Exception("Unsupported units") # unsupported units
     
-    def update_joint_history(self, joint_angles):
-        self.joint_history[self.history_id] = joint_angles
-        self.history_id = (self.history_id + 1) % self.params.length_joint_history # Move to the next position in the history (circular buffer)
+    # def update_joint_history(self, joint_angles):
+    #     self.joint_history[self.history_id] = joint_angles
+    #     self.history_id = (self.history_id + 1) % self.params.length_joint_history # Move to the next position in the history (circular buffer)
 
-    def get_joint_jitter(self):
-        joint_angle_t = self.get_joint_history(n=0, units='rad')
-        joint_angle_t1 = self.get_joint_history(n=1, units='rad')
-        joint_angle_t2 = self.get_joint_history(n=2, units='rad')
+    # def get_joint_jitter(self):
+    #     joint_angle_t = self.get_joint_history(n=0, units='rad')
+    #     joint_angle_t1 = self.get_joint_history(n=1, units='rad')
+    #     joint_angle_t2 = self.get_joint_history(n=2, units='rad')
         
-        jitter_1st_order = joint_angle_t - joint_angle_t1
-        jitter_2nd_order = joint_angle_t - 2 * joint_angle_t1 + joint_angle_t2
+    #     jitter_1st_order = joint_angle_t - joint_angle_t1
+    #     jitter_2nd_order = joint_angle_t - 2 * joint_angle_t1 + joint_angle_t2
 
-        return np.abs(jitter_1st_order), np.abs(jitter_2nd_order)
+    #     return np.abs(jitter_1st_order), np.abs(jitter_2nd_order)
     
