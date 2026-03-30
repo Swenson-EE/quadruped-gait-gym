@@ -43,6 +43,9 @@ class BittleSimulator:
             s_rnd.JointRandomizer(
                 sim=self,
                 joint_qpos_ids=self.context.robot_info.joint_qpos_ids
+            ),
+            s_rnd.JointHistoryRandomizer(
+                sim=self
             )
         ])
 

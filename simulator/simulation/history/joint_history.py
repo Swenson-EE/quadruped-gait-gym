@@ -8,8 +8,15 @@ class JointHistory:
         self._joint_history = None
         self._history_id = 0
 
+    def size(self):
+        return self.length_history, self.num_joints
+
     def clear(self):
         self._joint_history = np.zeros((self.length_history, self.num_joints))
+        self._history_id = 0
+
+    def set_history(self, history):
+        self._joint_history = history
         self._history_id = 0
 
     def push_joint_angles(self, joint_angles):
@@ -25,6 +32,10 @@ class JointHistory:
             return self._joint_history[id]
         else:
             raise Exception("Unsupported units") # unsupported units
+        
+    def get_ordered_history(self):
+        id = self._history_id
+        return np.roll(self._joint_history, -id, axis=0)
 
     def get_jitter(self):
         joint_angle_t = self.get_history(n=0, units='rad')
@@ -36,6 +47,6 @@ class JointHistory:
 
         return np.abs(jitter_1st_order), np.abs(jitter_2nd_order)
     
-    def get_ordered_history(self):
-        id = self._history_id
-        return np.roll(self._joint_history, -id, axis=0)
+    
+
+    
