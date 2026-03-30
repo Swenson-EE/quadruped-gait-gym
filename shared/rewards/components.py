@@ -15,6 +15,7 @@ class RewardComponents:
 
     paw_clearance: np.ndarray
     num_arms_contacting: int
+    num_paws_contacting: int
     paw_slipping: np.ndarray
     
     roll: np.float64

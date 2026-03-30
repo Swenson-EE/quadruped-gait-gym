@@ -178,7 +178,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         imu_accel = self.sim.context.sensors.imu_accel
 
         paw_clearance = self.sim.context.metrics.paw_clearance()
-        paw_slipping = self.sim.context.metrics.paw_slipping()
+        paw_slipping, num_paws_contacting = self.sim.context.metrics.paw_slipping()
         num_arms_contacting = len(self.sim.context.contacts.contacting_geoms(self.sim.context.robot_info.arm_geom_ids))
 
         roll, pitch = self.sim.context.kinematics.get_tilt()
@@ -196,6 +196,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             paw_clearance=paw_clearance,
             paw_slipping=paw_slipping,
             num_arms_contacting=num_arms_contacting,
+            num_paws_contacting=num_paws_contacting,
 
             roll=roll,
             pitch=pitch
@@ -228,6 +229,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         # Calculate crawling penalty
         crawling_penalty = self.rewards.WT_Crawl * components.num_arms_contacting
 
+        # Paw contacting penalty
+        paw_contact_penalty = 0 if components.num_paws_contacting > 1 else 1
+
         # Calculate tilt penalty        
         stability_angle_penalty = self.rewards.WT_Instability * (components.roll**2 + components.pitch**2)
         stability_rate_penalty = self.rewards.WT_InstabilityRate * (components.imu_gyro[0]**2 + components.imu_gyro[1]**2)
@@ -252,7 +256,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             'stability_rate': stability_rate_penalty,
             'z_bounce': z_bounce_penalty,
             'living': self.rewards.WT_Living,
-            'steps': self.total_session_step_count / self.params.total_length
+            'steps': self.total_session_step_count / self.params.total_length,
+            'paw_contact': paw_contact_penalty
         }
 
         return reward, penalty
