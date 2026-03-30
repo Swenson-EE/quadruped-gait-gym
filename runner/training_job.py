@@ -3,7 +3,7 @@ from enum import Enum
 import json
 
 from shared.algorithm.algorithm_types import Algorithm
-from runner.training_parser import build_parser_from_dataclass, parse_args_to_dataclass
+from shared.utils import build_parser_from_dataclass, parse_args_to_dataclass
 
 
 @dataclass
@@ -43,7 +43,7 @@ class TrainingJob:
         
         return args
     
-    
+
 with open("config/training_job_defaults.json") as file:
     job_defaults = json.load(file)
 
