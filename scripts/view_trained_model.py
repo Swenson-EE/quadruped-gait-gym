@@ -82,8 +82,6 @@ if __name__ == "__main__":
 
                 if is_stopped:
                     obs, info = env.reset()
-            else:
-                print('stopped')
     
 
 
