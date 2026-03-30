@@ -1,9 +1,9 @@
 import mujoco
 
-from ..core.subsystem import RobotSubsystem
+from simulator.physics.core import PhysicsSubsystem
 
 
-class Sensors(RobotSubsystem):
+class Sensors(PhysicsSubsystem):
     _sensor_slices = {}
 
         

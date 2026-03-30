@@ -1,9 +1,9 @@
 import mujoco
 
-from ..core.subsystem import RobotSubsystem
+from simulator.physics.core import PhysicsSubsystem
 
 
-class Contacts(RobotSubsystem):
+class Contacts(PhysicsSubsystem):
     """
     Handles all simulation collision and ground interaction
     """

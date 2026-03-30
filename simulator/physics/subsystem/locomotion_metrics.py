@@ -1,10 +1,10 @@
 import mujoco
 import numpy as np
 
-from ..core.subsystem import RobotSubsystem
+from simulator.physics.core import PhysicsSubsystem
 
 
-class LocomotionMetrics(RobotSubsystem):
+class LocomotionMetrics(PhysicsSubsystem):
 
 
     def paw_clearance(self):
@@ -38,9 +38,11 @@ class LocomotionMetrics(RobotSubsystem):
 
     def paw_slipping(self):
         slipping = 0.0
+        num_paws_contacting = 0
         paw_geom_ids = self.context.robot_info.foot_geom_ids
 
         for geom_id in self.contacts.contacting_geoms(paw_geom_ids):
+            num_paws_contacting += 1
             body_id = self.kinematics.model.geom_bodyid[geom_id]
             vel = self.context.kinematics.body_velocity(body_id)
 
@@ -50,7 +52,7 @@ class LocomotionMetrics(RobotSubsystem):
 
             slipping += np.linalg.norm(vel)
 
-        return slipping
+        return slipping, num_paws_contacting
     
     
     def is_moving(self, moving_threshold = 1e-3):

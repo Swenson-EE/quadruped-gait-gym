@@ -5,10 +5,10 @@ from mujoco import MjModel, MjData
 
 import numpy as np
 
-from ..core.subsystem import RobotSubsystem
+from simulator.physics.core import PhysicsSubsystem
 
 
-class Kinematics(RobotSubsystem):
+class Kinematics(PhysicsSubsystem):
     """
     Handles info such as positions, orientations, and velocities
     """

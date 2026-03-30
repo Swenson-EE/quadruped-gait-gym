@@ -1,4 +1,4 @@
-from simulator.core import RandomizationSubsystem
+from simulator.physics.core import RandomizationSubsystem
 import numpy as np
 
 class JointRandomizer(RandomizationSubsystem):

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import mujoco
 import numpy as np
 
-from simulator.state import RobotState
+from simulator.physics.state import PhysicsState
 
 
 @dataclass
@@ -30,7 +30,7 @@ class BittleSimulator:
 
         self.n_substeps = int(parameters.control_dt / self.model.opt.timestep)      # The number of substeps to take in a single physics step to simulate control delay
 
-        self.robot_state = RobotState(self.model, self.data)
+        self.robot_state = PhysicsState(self.model, self.data)
 
         
     @property

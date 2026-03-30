@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from .subsystem import RobotSubsystem
+from .subsystem import PhysicsSubsystem
 
 
-class RandomizationSubsystem(RobotSubsystem, ABC):
+class RandomizationSubsystem(PhysicsSubsystem, ABC):
     def __init__(self, context: "SimulationContext"):
         super().__init__(context)
         

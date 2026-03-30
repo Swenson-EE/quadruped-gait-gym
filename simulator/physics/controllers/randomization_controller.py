@@ -1,6 +1,6 @@
 import numpy as np
 
-from simulator.core import RandomizationSubsystem
+from simulator.physics.core import RandomizationSubsystem
 
 
 class RandomizationController:

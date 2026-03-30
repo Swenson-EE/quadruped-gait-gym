@@ -1,2 +1,2 @@
 from .randomization_subsystem import RandomizationSubsystem
-from .subsystem import RobotSubsystem
+from .subsystem import PhysicsSubsystem

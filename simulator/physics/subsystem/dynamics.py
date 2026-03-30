@@ -1,9 +1,9 @@
 import mujoco
 import numpy as np
 
-from ..core.subsystem import RobotSubsystem
+from simulator.physics.core import PhysicsSubsystem
 
-class Dynamics(RobotSubsystem):
+class Dynamics(PhysicsSubsystem):
     """
     Handles info such as forces and impulses
     """

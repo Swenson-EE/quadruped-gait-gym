@@ -1,10 +1,10 @@
 import mujoco
 
-from simulator.state.sim_context import SimulationContext
-from simulator.controllers import RandomizationController
-from simulator.randomization import InitialPoseRandomizer, JointRandomizer
+from simulator.physics.state.sim_context import SimulationContext
+from simulator.physics.controllers import RandomizationController
+from simulator.physics.randomization import InitialPoseRandomizer, JointRandomizer
 
-class RobotState:
+class PhysicsState:
     def __init__(self, model, data):
         self.model = model
         self.data = data
