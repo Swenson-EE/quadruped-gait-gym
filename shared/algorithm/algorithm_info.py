@@ -1,6 +1,9 @@
 from shared.algorithm.algorithm_types import Algorithm
 from environment.base_bittle_environment import BaseBittleEnvironment, EnvironmentParameters
 
+from typing import Type
+
+
 def get_algo_model(algo: Algorithm):
     ModelClass = None
 
@@ -28,28 +31,26 @@ def get_algo_model(algo: Algorithm):
 
 
 
-def get_algo_environment(algo: Algorithm, parameters: EnvironmentParameters = EnvironmentParameters()):
-    env: BaseBittleEnvironment = None
-
-    match algo:
+def get_algorithm_class(algorithm: Algorithm) -> Type[BaseBittleEnvironment] | None:
+    match algorithm:
         case Algorithm.SAC | Algorithm.DDPG | Algorithm.PPO_C:
-            from environment.continuous_bittle_environment import ContinuousBittleEnvironment, ContinuousEnvironmentParameters
-
-            print(f"Continuous algorithm ({algo})")
-
-            # set up environment
-            env = ContinuousBittleEnvironment(parameters=parameters)
-            
+           from environment.continuous_bittle_environment import ContinuousBittleEnvironment
+           return ContinuousBittleEnvironment
         case Algorithm.QLEARNING | Algorithm.PPO_D:
-            
-
-            print(f'Discrete algorithm ({algo})')
-
-
+            print(f'Discrete algorithm ({algorithm})')
         case _:
-            print("Invalid algorithm:", algo)    
+            print("Invalid algorithm:", algorithm)    
+
+    return None
+
+
+def get_algo_environment(algo: Algorithm, parameters: EnvironmentParameters = EnvironmentParameters()):
+    algorithm_class: BaseBittleEnvironment = get_algorithm_class(algo)
+
+    if algorithm_class is not None:
+        return algorithm_class(parameters=parameters)
             
-    return env
+    return None
 
 
 
@@ -60,27 +61,16 @@ def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: Env
     
     from stable_baselines3.common.env_util import make_vec_env
     from stable_baselines3.common.vec_env import SubprocVecEnv
+    
+    algo_env_class = get_algorithm_class(algo)
 
-    match algo:
-        case Algorithm.SAC | Algorithm.DDPG | Algorithm.PPO_C:
-            from environment.continuous_bittle_environment import ContinuousBittleEnvironment, ContinuousEnvironmentParameters
+    if algo_env_class is not None:
+        from environment.wrappers import DeltaActionWrapper
 
-            print(f"Continuous algorithm ({algo})")
+        env = make_vec_env(
+            lambda: DeltaActionWrapper(env=algo_env_class(parameters=parameters), max_delta=15),
+            n_envs=parallel_env,
+            vec_env_cls=SubprocVecEnv
+        )
 
-            # set up environment
-            env = make_vec_env(
-                lambda: ContinuousBittleEnvironment(parameters=parameters),
-                n_envs=parallel_env,
-                vec_env_cls=SubprocVecEnv
-            )
-            
-        case Algorithm.QLEARNING | Algorithm.PPO_D:
-            
-
-            print(f'Discrete algorithm ({algo})')
-
-
-        case _:
-            print("Invalid algorithm:", algo)    
-            
     return env
