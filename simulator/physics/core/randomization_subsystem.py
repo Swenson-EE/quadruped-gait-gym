@@ -13,6 +13,6 @@ class RandomizationSubsystem(ABC):
     
     @property
     def context(self):
-        return self.sim.context
+        return self.sim.phys_context
     
     

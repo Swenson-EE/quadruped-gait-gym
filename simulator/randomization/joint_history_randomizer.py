@@ -9,7 +9,7 @@ class JointHistoryRandomizer(RandomizationSubsystem):
 
     @property
     def size(self):
-        length_history, num_joints = self.sim.sim_state.joints.size()
+        length_history, num_joints = self.sim.states.sim_state.joints.size()
         return length_history, num_joints
 
 
@@ -17,11 +17,11 @@ class JointHistoryRandomizer(RandomizationSubsystem):
         length_history, num_joints = self.size
         joint_history = np.zeros((length_history, num_joints), dtype=np.float32)
         
-        joint_angles = self.context.kinematics.joint.get_angles()
+        joint_angles = self.context.systems.kinematics.joint.get_angles()
         joint_history[0] = joint_angles
 
         noise = rng.normal(0, self.noise_scale, size=(length_history - 1, num_joints))
         joint_history[1:] = joint_angles + noise
 
-        self.sim.sim_state.joints.set_history(joint_history)
+        self.sim.states.sim_state.joints.set_history(joint_history)
 

@@ -1,14 +1,16 @@
 import mujoco
 
-from simulator.physics.state.sim_context import SimulationContext
+from simulator.core import SimulationState
+from simulator.physics.state.physics_context import PhysicsContext
 
-class PhysicsState:
+class PhysicsState(SimulationState):
     def __init__(self, model, data):
         self.model = model
         self.data = data
 
-        self.context = SimulationContext(self.model, self.data)
+        self.context = PhysicsContext(self.model, self.data)
 
+    
         
 
 

@@ -13,7 +13,7 @@ class FootKinematics(PhysicsSubsystem):
         ray_dir = np.array([0, 0, -1.0])
 
         for site_id in paw_site_ids:
-            paw_pos = self.context.kinematics.site.get_position(site_id)
+            paw_pos = self.context.systems.kinematics.site.get_position(site_id)
 
             geomid = np.array([-1], dtype=np.int32) # geomid[0] -> id of hit geom
             normal = np.zeros(3) # surface normal at hit
@@ -44,10 +44,9 @@ class FootKinematics(PhysicsSubsystem):
         for geom_id in self.contacts.contacting_geoms(paw_geom_ids):
             num_paws_contacting += 1
             body_id = self.kinematics.model.geom_bodyid[geom_id]
-            #vel = self.context.kinematics.body_velocity(body_id)
-            vel = self.context.kinematics.body.get_velocity(body_id)
+            vel = self.context.systems.kinematics.body.get_velocity(body_id)
 
-            normals = self.context.contacts.contact_normals(geom_id)
+            normals = self.context.systems.contacts.contact_normals(geom_id)
             for n in normals:
                 vel = vel - np.dot(vel, n) * n
 
