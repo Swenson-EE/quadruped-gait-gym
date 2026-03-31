@@ -46,6 +46,9 @@ class BittleSimulator:
             ),
             s_rnd.JointHistoryRandomizer(
                 sim=self
+            ),
+            s_rnd.FrictionRandomizer(
+                sim=self
             )
         ])
 

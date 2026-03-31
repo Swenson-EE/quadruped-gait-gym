@@ -1,3 +1,4 @@
 from .initial_pose_randomizer import InitialPoseRandomizer
 from .joint_randomizer import JointRandomizer
 from .joint_history_randomizer import JointHistoryRandomizer
+from .friction_randomizer import FrictionRandomizer
