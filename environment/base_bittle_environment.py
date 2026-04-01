@@ -90,7 +90,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         self.sim.data.qvel = 0
 
         self.sim.forward()
-             
+        
 
         
 
@@ -173,7 +173,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         velocity = self.sim.phys_context.kinematics.basis.world_to_local(self.sim.phys_context.kinematics.world.get_velocity())
 
         jitter_1st_order, jitter_2nd_order = self.sim.states.sim.joints.get_jitter()
-        joint_variance = np.var(self.sim.states.sim.joints.real.deg.get(), axis=0)
+        joint_variance = np.var(self.sim.states.sim.joints.real.deg.get()[:], axis=0)
 
         imu_gyro = self.sim.phys_context.sensors.imu_gyro
         imu_accel = self.sim.phys_context.sensors.imu_accel

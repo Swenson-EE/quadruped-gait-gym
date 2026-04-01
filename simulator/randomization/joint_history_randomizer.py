@@ -14,14 +14,15 @@ class JointHistoryRandomizer(RandomizationSubsystem):
 
 
     def apply(self, rng):
-        length_history, num_joints = self.size
-        joint_history = np.zeros((length_history, num_joints), dtype=np.float32)
+        #length_history, num_joints = self.size
+        joint_history = np.zeros((20, 8), dtype=np.float32)
         
         joint_angles = self.context.kinematics.joint.get_angles()
-        joint_history[0] = joint_angles
+        
 
-        noise = rng.normal(0, self.noise_scale, size=(length_history - 1, num_joints))
-        joint_history[1:] = joint_angles + noise
+        noise = rng.normal(0, self.noise_scale, size=self.size)
+        joint_history = joint_angles + noise
+        joint_history[0] = joint_angles
         
         self.sim.states.sim.joints.real.deg.set(joint_history)
 
