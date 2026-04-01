@@ -7,7 +7,7 @@ import shared.training.train as training_module
 from shared.training.training_status import TrainingStatus
 
 
-
+training_function = None
 
 def print_stage(stage, job, n=30):
     print("=" * n)
@@ -24,10 +24,21 @@ def worker_loop(queue):
         except:
             continue    # no job, loop again
         
-        importlib.reload(training_module)
+        try:
+            importlib.reload(training_module)
+            global training_function
+            training_function = training_module.train
+        except Exception as e:
+            print('[ERROR] reloading training module')
+            training_function = None
+
+        if training_function is None:
+            print("[ERROR] No training function available")
+            continue
         
         print_stage("START", job)
-        status, message = training_module.train(job)
+        status, message = training_function(job)
+        #status, message = training_module.train(job)
         
         if status == TrainingStatus.SUCCESS:
             print_stage("DONE", job)
