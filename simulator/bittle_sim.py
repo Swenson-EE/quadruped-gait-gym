@@ -24,8 +24,8 @@ class BittleSimulator:
     @dataclass
     class SimulatorStates:
         def __init__(self, model, data):
-            self.phys_state = PhysicsState(model, data)
-            self.sim_state = SimulationState(model, data)
+            self.phys = PhysicsState(model, data)
+            self.sim = SimulationState(model, data)
 
 
     NUM_JOINTS = 8          # Number of joints for quadruped
@@ -63,11 +63,11 @@ class BittleSimulator:
         
     @property
     def phys_context(self):
-        return self.states.phys_state.context
+        return self.states.phys.context
 
     def reset(self):
         mujoco.mj_resetData(self.model, self.data)
-        self.phys_context.systems.kinematics.basis.update_rotation()
+        self.phys_context.kinematics.basis.update_rotation()
 
     def step(self, action = None):
         if action is not None:
@@ -76,7 +76,7 @@ class BittleSimulator:
         for _ in range(self.n_substeps): # Simulate control updates
             mujoco.mj_step(self.model, self.data)
 
-        self.phys_context.systems.kinematics.basis.update_rotation()
+        self.phys_context.kinematics.basis.update_rotation()
 
     def forward(self):
         mujoco.mj_forward(self.model, self.data)

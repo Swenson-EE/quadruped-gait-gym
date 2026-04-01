@@ -4,7 +4,7 @@ import numpy as np
 
 @dataclass
 class RewardComponents:
-    position: np.ndarray
+    position_delta: np.ndarray
     velocity: np.ndarray
     
     jitter_1st_order: np.ndarray

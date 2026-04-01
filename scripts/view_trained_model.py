@@ -58,7 +58,7 @@ if __name__ == "__main__":
         print("No env instantiated")
         exit()
 
-    ModelClass = get_algo_model(trained_model.algo)
+    ModelClass, model_parameters = get_algo_model(trained_model.algo)
     if ModelClass is None:
         print('No model instantiated')
         exit()    

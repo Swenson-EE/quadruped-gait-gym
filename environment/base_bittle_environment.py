@@ -73,7 +73,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.sim.states.sim_state.joints.clear()
+        self.sim.states.sim.joints.clear()
 
         self.step_count = 0
         self.total_distance_traveled = 0
@@ -82,12 +82,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         self.sim.reset()
 
 
-        
-
         self.sim.randomization.apply(self.np_random)
         self.sim.forward()
+        
 
-        self.sim.data.qpos[2] -= np.min(self.sim.phys_context.systems.kinematics.foot.paw_clearance())
+        self.sim.data.qpos[2] -= np.min(self.sim.phys_context.kinematics.foot.paw_clearance())
         self.sim.data.qvel = 0
 
         self.sim.forward()
@@ -108,13 +107,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def step(self, action):
         decoded_action = self.decode_action(action)
 
-        self.last_position = self.sim.phys_context.systems.kinematics.world.get_position().copy()
-
+        self.last_position = self.sim.phys_context.kinematics.world.get_position().copy()
         self.sim.step(decoded_action)
         
-        joint_angles = self.sim.phys_context.systems.kinematics.joint.get_angles()
-        self.sim.states.sim_state.joints.push_joint_angles(joint_angles)
-        
+        joint_angles = self.sim.phys_context.kinematics.joint.get_angles()
+        self.sim.states.sim.joints.real.deg.push(joint_angles)
+
         
         observation = self.get_observation()
 
@@ -139,7 +137,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
             terminated = False
             truncated = True
 
-        elif self.sim.phys_context.systems.metrics.is_fallen():
+        elif self.sim.phys_context.metrics.is_fallen():
             self.total_session_step_count += self.step_count
             total_reward = 0
             terminated = True
@@ -157,10 +155,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
 
     def get_observation(self):
-        imu_gyro = self.sim.phys_context.systems.sensors.imu_gyro
-        imu_accel = self.sim.phys_context.systems.sensors.imu_accel
+        imu_gyro = self.sim.phys_context.sensors.imu_gyro
+        imu_accel = self.sim.phys_context.sensors.imu_accel
 
-        joint_history = self.sim.states.sim_state.joints.get_ordered_history()
+        joint_history = self.sim.states.sim.joints.internal.get()
+        print(joint_history)
 
         return {
             "joint_history": joint_history,
@@ -169,22 +168,22 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         }
 
     def get_reward_components(self) -> RewardComponents:
-        position = self.sim.phys_context.systems.kinematics.world.get_position()
-        position_delta = self.sim.phys_context.systems.kinematics.basis.world_to_local(position - self.last_position)
+        position = self.sim.phys_context.kinematics.world.get_position()
+        position_delta = self.sim.phys_context.kinematics.basis.world_to_local(position - self.last_position)
 
-        velocity = self.sim.phys_context.systems.kinematics.basis.world_to_local(self.sim.phys_context.systems.kinematics.world.get_velocity())
+        velocity = self.sim.phys_context.kinematics.basis.world_to_local(self.sim.phys_context.kinematics.world.get_velocity())
 
-        jitter_1st_order, jitter_2nd_order = self.sim.states.sim_state.joints.get_jitter()
-        joint_variance = np.var(self.sim.states.sim_state.joints.get_ordered_history()[-10:], axis=0)
+        jitter_1st_order, jitter_2nd_order = self.sim.states.sim.joints.get_jitter()
+        joint_variance = np.var(self.sim.states.sim.joints.real.deg.get(), axis=0)
 
-        imu_gyro = self.sim.phys_context.systems.sensors.imu_gyro
-        imu_accel = self.sim.phys_context.systems.sensors.imu_accel
+        imu_gyro = self.sim.phys_context.sensors.imu_gyro
+        imu_accel = self.sim.phys_context.sensors.imu_accel
 
-        paw_clearance = self.sim.phys_context.systems.kinematics.foot.paw_clearance()
-        paw_slipping, num_paws_contacting = self.sim.phys_context.systems.kinematics.foot.paw_slipping()
-        num_arms_contacting = len(self.sim.phys_context.systems.contacts.contacting_geoms(self.sim.phys_context.robot_info.arm_geom_ids))
+        paw_clearance = self.sim.phys_context.kinematics.foot.paw_clearance()
+        paw_slipping, num_paws_contacting = self.sim.phys_context.kinematics.foot.paw_slipping()
+        num_arms_contacting = len(self.sim.phys_context.contacts.contacting_geoms(self.sim.phys_context.robot_info.arm_geom_ids))
 
-        roll, pitch = self.sim.phys_context.systems.kinematics.basis.get_tilt()
+        roll, pitch = self.sim.phys_context.kinematics.basis.get_tilt()
 
 
         return RewardComponents(

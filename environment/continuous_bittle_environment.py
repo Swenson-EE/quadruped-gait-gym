@@ -19,17 +19,29 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
         super().__init__(parameters=parameters)
 
         self.action_space = gym.spaces.Box(
-            np.array([self.params.joint_min] * self.sim.NUM_JOINTS),
-            np.array([self.params.joint_max] * self.sim.NUM_JOINTS)
+            # np.array([self.params.joint_min] * self.sim.NUM_JOINTS),
+            # np.array([self.params.joint_max] * self.sim.NUM_JOINTS)
+            np.array([-1] * self.sim.NUM_JOINTS),
+            np.array([1] * self.sim.NUM_JOINTS)
         )
 
         self.observation_space = gym.spaces.Dict({
-            'joint_history': gym.spaces.Box(self.params.joint_min, self.params.joint_max, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
+            # 'joint_history': gym.spaces.Box(-1, 1, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
+            'joint_history': gym.spaces.Box(-1, 1, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
             'gyro': gym.spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
             'accel': gym.spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32)
         })
 
 
     def decode_action(self, action):
-        return action
-        return np.deg2rad(action)
+        #return action
+        #action = np.array([120] * 8)
+        decoded = np.deg2rad(action * 100)
+        # print('\n')
+        # print('action:', action)
+        # print('decoded:', decoded)
+        # print("\n")
+
+        #print('action:', action)
+        #print('decoded:', decoded)
+        return decoded

@@ -1,8 +1,12 @@
 from scheduler.base import SchedulerConfig
 from scheduler.manager import QueueManager, job_queue, shutdown_flag
 
-from shared.training.train import train
+#from shared.training.train import train
+import importlib
+import shared.training.train as training_module
 from shared.training.training_status import TrainingStatus
+
+
 
 
 def print_stage(stage, job, n=30):
@@ -20,14 +24,20 @@ def worker_loop(queue):
         except:
             continue    # no job, loop again
         
+        importlib.reload(training_module)
+        
         print_stage("START", job)
-        status, message = train(training_job=job)
+        status, message = training_module.train(job)
+        
         if status == TrainingStatus.SUCCESS:
             print_stage("DONE", job)
         else:
             print_stage(status.value.upper(), message)
             
+        print(f"[QUEUE] Items left in queue {queue.qsize()}")
         print("\n", "~" * 40, "\n")
+
+        
         
 
     print("Shutdown requested, stopping server.")

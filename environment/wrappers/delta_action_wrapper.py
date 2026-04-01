@@ -14,22 +14,26 @@ class DeltaActionWrapper(gym.ActionWrapper):
         obs, info = self.env.reset(**kwargs)
 
         self.prev_action = None
+        self.max = None
 
         return obs, info
     
     def action(self, action):
         if self.prev_action is None:
-            self.prev_action = action.copy()
+            self.prev_action = action.copy() * 120
             return action
+
         
         # 1. limit how much the action can change
-        delta = action - self.prev_action
+        delta = (action * 120) - self.prev_action
         delta = np.clip(delta, -self.max_delta, self.max_delta)
 
         # 2. Apply delta
         constrainted_action = self.prev_action + delta
         
         self.prev_action = constrainted_action.copy()
-        return constrainted_action
+        return constrainted_action / 120
+
+        return action
 
 

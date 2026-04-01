@@ -16,11 +16,11 @@ class FrictionRandomizer(RandomizationSubsystem):
         return [sliding_friction, torsional_friction, rotational_friction]
 
     def _rand_ground_friction(self, rng):
-        ground_id = self.sim.states.phys_state.context.robot_info.ground_id
+        ground_id = self.sim.states.phys.context.robot_info.ground_id
         self.sim.model.geom_friction[ground_id, :] = self.random_friction(rng)
 
     def _rand_foot_friction(self, rng):
-        foot_ids = self.sim.states.phys_state.context.robot_info.foot_geom_ids
+        foot_ids = self.sim.states.phys.context.robot_info.foot_geom_ids
         feet_friction = self.random_friction(rng)
 
         for id in foot_ids:

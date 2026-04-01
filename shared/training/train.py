@@ -24,7 +24,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         print('Created environment')
         
         
-        ModelClass = get_algo_model(training_job.algo)
+        ModelClass, model_parameters = get_algo_model(training_job.algo)
 
         if ModelClass is None:
             return (TrainingStatus.NO_MODEL, "No model instantiated")
@@ -48,24 +48,25 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
 
         if model is None:
             print(f"Creating new checkpoint (algo={training_job.algo}, layers=({training_job.net_arch}))")
-
-            custom_architecture = dict(
-                net_arch=training_job.net_arch
-            )
+            
+            model_parameters.setdefault('policy_kwargs', {})['net_arch'] = training_job.net_arch # neural network
 
             model = ModelClass(
                 'MultiInputPolicy',
                 env,
-                policy_kwargs=custom_architecture, # neural network
+                **model_parameters,
 
                 learning_rate=training_job.lr,
                 gamma=training_job.discount_factor,
                         
+                n_steps=int((training_job.batch_steps * 8) / training_job.parallel_env),
 
                 seed=training_job.seed,
                 device=training_job.device,
                 verbose=training_job.verbose
             )
+
+            print('net_arch:', model.policy_kwargs["net_arch"])
 
 
         

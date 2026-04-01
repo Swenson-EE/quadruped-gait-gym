@@ -6,6 +6,7 @@ from typing import Type
 
 def get_algo_model(algo: Algorithm):
     ModelClass = None
+    model_parameters = {}
 
     match algo:
         case Algorithm.SAC:
@@ -27,7 +28,7 @@ def get_algo_model(algo: Algorithm):
         case _:
             ModelClass = None
 
-    return ModelClass
+    return ModelClass, model_parameters
 
 
 
@@ -68,7 +69,8 @@ def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: Env
         from environment.wrappers import DeltaActionWrapper
 
         env = make_vec_env(
-            lambda: DeltaActionWrapper(env=algo_env_class(parameters=parameters), max_delta=15),
+            #lambda: DeltaActionWrapper(env=algo_env_class(parameters=parameters), max_delta=45),
+            lambda: algo_env_class(parameters=parameters),
             n_envs=parallel_env,
             vec_env_cls=SubprocVecEnv
         )

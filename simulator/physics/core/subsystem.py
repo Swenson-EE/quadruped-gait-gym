@@ -21,23 +21,23 @@ class PhysicsSubsystem(ABC):
 
     @property
     def kinematics(self) -> "Kinematics":
-        return self.context.systems.kinematics
+        return self.context.kinematics
 
     @property
     def contacts(self) -> "Contacts":
-        return self.context.systems.contacts
+        return self.context.contacts
     
     @property
     def dynamics(self) -> "Dynamics":
-        return self.context.systems.dynamics
+        return self.context.dynamics
     
     @property
     def sensors(self) -> "Sensors":
-        return self.context.systems.sensors
+        return self.context.sensors
     
     @property
     def metrics(self) -> "LocomotionMetrics":
-        return self.context.systems.metrics
+        return self.context.metrics
 
     def reset(rng: np.random.Generator):
         pass
