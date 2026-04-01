@@ -84,32 +84,7 @@ class JointHistory:
     def real(self):
         return self._real_view
 
-    # def set_history(self, history):
-    #     self._joint_history = history
-    #     self._history_id = 0
-
-    # def push_joint_angles(self, joint_angles):
-    #     self._joint_history[self._history_id] = joint_angles
-    #     self._history_id = (self._history_id + 1) % self.length_history
-
-    # def get_history(self, n=0, units='rad'):
-    #     id = (self._history_id - n - 1) % self.length_history
-
-    #     if units == 'rad':
-    #         return np.deg2rad(self._joint_history[id])
-    #     elif units == 'deg':
-    #         return self._joint_history[id]
-    #     else:
-    #         raise Exception("Unsupported units") # unsupported units
-        
-    # def get_ordered_history(self):
-    #     id = self._history_id
-    #     return np.roll(self._joint_history, -id, axis=0)
-
     def get_jitter(self):
-        # joint_angle_t = self.get_history(n=0, units='rad')
-        # joint_angle_t1 = self.get_history(n=1, units='rad')
-        # joint_angle_t2 = self.get_history(n=2, units='rad')
         joint_angle_t = self.real.rad.get_index(n=0)
         joint_angle_t1 = self.real.rad.get_index(n=1)
         joint_angle_t2 = self.real.rad.get_index(n=2)

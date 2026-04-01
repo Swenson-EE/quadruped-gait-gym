@@ -159,7 +159,6 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         imu_accel = self.sim.phys_context.sensors.imu_accel
 
         joint_history = self.sim.states.sim.joints.internal.get()
-        print(joint_history)
 
         return {
             "joint_history": joint_history,
