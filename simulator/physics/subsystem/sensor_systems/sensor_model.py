@@ -8,9 +8,9 @@ import numpy as np
 class SensorModel(PhysicsSubsystem, TransformableValue):
     _sensor_slice: slice = None
     
-    def __init__(self, context, name, sensor_id, max_value=1):
+    def __init__(self, context, name, sensor_id, max_value=1, shape=(3,)):
         PhysicsSubsystem.__init__(self, context)
-        TransformableValue.__init__(self, shape=(3,1), scale=max_value)
+        TransformableValue.__init__(self, shape=shape, scale=max_value)
 
         self._name = name
         self._sensor_id = sensor_id
@@ -28,8 +28,11 @@ class SensorModel(PhysicsSubsystem, TransformableValue):
 
         return self._sensor_slice
 
+    def _get_value(self):
+        return self.data.sensordata[self._get_sensor_slice()]
+
     def read(self):
-        sensor_value = self.data.sensordata[self._get_sensor_slice()]
+        sensor_value = self._get_value()
         self.real.set(sensor_value)
 
         
