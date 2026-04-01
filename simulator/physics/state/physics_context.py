@@ -17,4 +17,3 @@ class PhysicsContext:
         self.sensors = Sensors(self)
         self.metrics = LocomotionMetrics(self)
         
-        

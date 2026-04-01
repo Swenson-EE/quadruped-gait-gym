@@ -39,9 +39,7 @@ class BittleSimulator:
         self.data = mujoco.MjData(self.model)
 
         self.n_substeps = int(parameters.control_dt / self.model.opt.timestep)      # The number of substeps to take in a single physics step to simulate control delay
-
-        #self.phys_state = PhysicsState(self.model, self.data)
-        #self.sim_state = SimulationState(self.model, self.data)
+        
         self.states = BittleSimulator.SimulatorStates(self.model, self.data)
 
         self.randomization = RandomizationController(modules=[

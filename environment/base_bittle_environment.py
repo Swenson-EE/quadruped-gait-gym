@@ -91,7 +91,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         self.sim.forward()
         
-
+        self.sim.states.phys.context.sensors.reset(self.np_random)
         
 
         observation = self.get_observation()
@@ -112,6 +112,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         
         joint_angles = self.sim.phys_context.kinematics.joint.get_angles()
         self.sim.states.sim.joints.real.deg.push(joint_angles)
+
+        self.sim.states.phys.context.sensors.step(self.np_random)
 
         
         observation = self.get_observation()
@@ -157,13 +159,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def get_observation(self):
         imu_gyro = self.sim.phys_context.sensors.imu_gyro
         imu_accel = self.sim.phys_context.sensors.imu_accel
-
-        joint_history = self.sim.states.sim.joints.internal.get()
+        joint_history = self.sim.states.sim.joints       
 
         return {
-            "joint_history": joint_history,
-            "gyro": imu_gyro,
-            "accel": imu_accel
+            "joint_history": joint_history.internal.get(),
+            "gyro": np.clip(imu_gyro.internal.get(), -1.0, 1.0),
+            "accel": np.clip(imu_accel.internal.get(), -1.0, 1.0)
         }
 
     def get_reward_components(self) -> RewardComponents:
@@ -175,8 +176,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         jitter_1st_order, jitter_2nd_order = self.sim.states.sim.joints.get_jitter()
         joint_variance = np.var(self.sim.states.sim.joints.real.deg.get()[:], axis=0)
 
-        imu_gyro = self.sim.phys_context.sensors.imu_gyro
-        imu_accel = self.sim.phys_context.sensors.imu_accel
+        imu_gyro = self.sim.phys_context.sensors.imu_gyro.internal.get()
+        imu_accel = self.sim.phys_context.sensors.imu_accel.internal.get()
 
         paw_clearance = self.sim.phys_context.kinematics.foot.paw_clearance()
         paw_slipping, num_paws_contacting = self.sim.phys_context.kinematics.foot.paw_slipping()

@@ -39,5 +39,12 @@ class PhysicsSubsystem(ABC):
     def metrics(self) -> "LocomotionMetrics":
         return self.context.metrics
 
-    def reset(rng: np.random.Generator):
+    
+    def reset(self, rng: np.random.Generator):
+        for name, cls in vars(self).items():
+            if isinstance(cls, PhysicsSubsystem):
+                cls.reset(rng)
+
+
+    def step(self, rng: np.random.Generator):
         pass
