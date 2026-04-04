@@ -1,1 +1,1 @@
-from .simulation_state import SimulationState
+from .robot_info import RobotInfo

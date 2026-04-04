@@ -27,21 +27,13 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
 
         self.observation_space = gym.spaces.Dict({
             # 'joint_history': gym.spaces.Box(-1, 1, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
-            'joint_history': gym.spaces.Box(-1, 1, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
+            'joint_history': gym.spaces.Box(-1, 1, shape=(self.sim.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
             'gyro': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32),
             'accel': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32)
         })
 
 
     def decode_action(self, action):
-        #return action
-        #action = np.array([120] * 8)
-        decoded = np.deg2rad(action * 100)
-        # print('\n')
-        # print('action:', action)
-        # print('decoded:', decoded)
-        # print("\n")
+        decoded = np.deg2rad(action * self.sim.params.joint_max)
 
-        #print('action:', action)
-        #print('decoded:', decoded)
         return decoded
