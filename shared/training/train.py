@@ -9,7 +9,8 @@ import numpy as np
 
 def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
     try:
-        np.set_printoptions(linewidth=150)
+        np.set_printoptions(linewidth=120)
+        
 
         print("-" * 30)
         print('[Training]\n')
