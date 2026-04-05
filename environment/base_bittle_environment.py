@@ -85,6 +85,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         self.sim.reset(self.np_random)        
         
+        kn_basis = self.sim.get(Physics).get(Kinematics).get(BasisKinematics)
+        self.initial_rotation = kn_basis.rot_mat
 
         observation = self.get_observation()
         info = {}
@@ -173,7 +175,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         kn_basis = kinematics.get(BasisKinematics)
 
         position = kn_world.get_position()
-        position_delta = kn_basis.world_to_local(position - self.last_position)
+        position_delta = self.initial_rotation.T @ (position - self.last_position)
+        #position_delta = kn_basis.world_to_local(position - self.last_position)
+
+        # print('position delta (world):', position_delta)
+        # print('position delta (local):', self.initial_rotation.T @ position_delta)
 
         velocity = kn_basis.world_to_local(kn_world.get_velocity())
 
