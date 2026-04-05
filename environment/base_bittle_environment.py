@@ -79,26 +79,11 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        #self.sim.states.sim.joints.clear()
-
         self.step_count = 0
         self.total_distance_traveled = 0
         self.last_position = np.zeros(3)
 
-        self.sim.reset(self.np_random)
-
-        # TODO: Figure out applying randomization
-        #self.sim.randomization.apply(self.np_random)
-        
-        
-        
-        #self.sim.data.qpos[2] -= np.min(self.sim.phys_context.kinematics.foot.paw_clearance())
-        
-
-        
-        
-        #self.sim.states.phys.context.sensors.reset(self.np_random)
-        
+        self.sim.reset(self.np_random)        
         
 
         observation = self.get_observation()
@@ -114,7 +99,6 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def step(self, action):
         decoded_action = self.decode_action(action)
 
-        #self.last_position = self.sim.phys_context.kinematics.world.get_position().copy()
         physics = self.sim.get(Physics)
         kinematics = physics.get(Kinematics)
         metrics = physics.get(LocomotionMetrics)
@@ -124,17 +108,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         self.sim.step(self.np_random, decoded_action)
         
-        #joint_angles = self.sim.phys_context.kinematics.joint.get_angles()
         # TODO: Add this to joints step
-        kn_joint = kinematics.get(JointKinematics)
-        joint_angles = kn_joint.get_angles()
-        self.sim.get(SimulationState).joints.real.deg.push(joint_angles)
-        #self.sim.states.sim.joints.real.deg.push(joint_angles)
-
-        #self.sim.states.phys.context.sensors.step(self.np_random)
-        # TODO: Add this to sensors step
-        #sensors = physics.get(Sensors)
-        #sensors.step(self.np_random)
         
         observation = self.get_observation()
 
@@ -176,10 +150,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         return self.params.rewards
 
 
-    def get_observation(self):
-        #imu_gyro = self.sim.phys_context.sensors.imu_gyro
-        #imu_accel = self.sim.phys_context.sensors.imu_accel
-        #joint_history = self.sim.states.sim.joints       
+    def get_observation(self):      
         physics = self.sim.get(Physics)
         sensors = physics.get(Sensors)
 
@@ -195,27 +166,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         }
 
     def get_reward_components(self) -> RewardComponents:
-        # position = self.sim.phys_context.kinematics.world.get_position()
-        # position_delta = self.sim.phys_context.kinematics.basis.world_to_local(position - self.last_position)
-        # print('position:', position)
-        # print('delta:', position_delta)
-
-        # velocity = self.sim.phys_context.kinematics.basis.world_to_local(self.sim.phys_context.kinematics.world.get_velocity())
-
-        # jitter_1st_order, jitter_2nd_order = self.sim.states.sim.joints.get_jitter()
-        # joint_variance = np.var(self.sim.states.sim.joints.real.deg.get()[:], axis=0)
-
-        # imu_gyro = self.sim.phys_context.sensors.imu_gyro.internal.get()
-        # imu_accel = self.sim.phys_context.sensors.imu_accel.internal.get()
-
-        # paw_clearance = self.sim.phys_context.kinematics.foot.paw_clearance()
-        # paw_slipping, num_paws_contacting = self.sim.phys_context.kinematics.foot.paw_slipping()
-        # num_arms_contacting = len(self.sim.phys_context.contacts.contacting_geoms(self.sim.phys_context.robot_info.arm_geom_ids))
-
-        # roll, pitch = self.sim.phys_context.kinematics.basis.get_tilt()
-
         physics = self.sim.get(Physics)
-        #robot_info = self.sim.get(RobotInfo)
 
         kinematics = physics.get(Kinematics)
         kn_world = kinematics.get(WorldKinematics)
