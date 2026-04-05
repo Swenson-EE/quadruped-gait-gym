@@ -15,7 +15,7 @@ class SimulationState(ModularSubsystem):
             scale=100.0
         )
 
-    def reset(self, rng):
+    def reset_start(self, rng):
         self.joints.clear()
 
     

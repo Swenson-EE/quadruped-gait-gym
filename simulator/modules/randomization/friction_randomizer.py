@@ -33,7 +33,7 @@ class FrictionRandomizer(Subsystem):
             self.model.geom_friction[id, :] = feet_friction
 
 
-    def reset(self, rng):
+    def reset_start(self, rng):
         self._rand_ground_friction(rng)
         self._rand_foot_friction(rng)
 

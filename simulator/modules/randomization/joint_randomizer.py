@@ -20,7 +20,7 @@ class JointRandomizer(Subsystem):
     def initialize(self):
         self.joint_qpos_ids = self.sim.robot_info.joint_qpos_ids
 
-    def reset(self, rng):
+    def reset_start(self, rng):
         random_joint_angles_deg = rng.uniform(
             *self.noise,
             size=len(self.joint_qpos_ids)

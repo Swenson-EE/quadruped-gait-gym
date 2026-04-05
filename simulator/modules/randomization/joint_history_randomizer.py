@@ -28,7 +28,7 @@ class JointHistoryRandomizer(Subsystem):
         return length_history, num_joints
 
 
-    def reset(self, rng):
+    def reset_end(self, rng):
         length_history, num_joints = self.size
         joint_history = np.zeros((length_history, num_joints), dtype=np.float32)
         

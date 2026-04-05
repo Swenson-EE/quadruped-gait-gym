@@ -90,15 +90,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         # TODO: Figure out applying randomization
         #self.sim.randomization.apply(self.np_random)
         
-        self.sim.forward()
+        
         
         #self.sim.data.qpos[2] -= np.min(self.sim.phys_context.kinematics.foot.paw_clearance())
-        paw_clearance = self.sim.get(Physics).get(Kinematics).get(FootKinematics).paw_clearance()
-        self.sim.data.qpos[2] -= np.min(paw_clearance)
+        
 
-        self.sim.data.qvel = 0
-
-        self.sim.forward()
+        
         
         #self.sim.states.phys.context.sensors.reset(self.np_random)
         
@@ -136,8 +133,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         #self.sim.states.phys.context.sensors.step(self.np_random)
         # TODO: Add this to sensors step
-        sensors = physics.get(Sensors)
-        sensors.step(self.np_random)
+        #sensors = physics.get(Sensors)
+        #sensors.step(self.np_random)
         
         observation = self.get_observation()
 

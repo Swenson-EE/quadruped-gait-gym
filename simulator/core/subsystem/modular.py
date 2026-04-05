@@ -1,7 +1,7 @@
 from simulator.core.subsystem.node import Node
 from simulator.core.registry import ModuleRegistry
 
-class Modular:
+class Modular(Node):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -20,11 +20,18 @@ class Modular:
         pass
 
 
-    def reset(self, rng):
+    def reset_start(self, rng):
         for module in self._modules.values():
-            module.reset(rng)
+            module.reset_start(rng)
 
-    def step(self, rng):
+    def reset_end(self, rng):
         for module in self._modules.values():
-            module.step(rng)
+            module.reset_end(rng)
 
+    def step_start(self, rng):
+        for module in self._modules.values():
+            module.step_start(rng)
+
+    def step_end(self, rng):
+        for module in self._modules.values():
+            module.step_end(rng)

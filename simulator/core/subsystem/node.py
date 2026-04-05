@@ -13,9 +13,15 @@ class Node:
         self.parent = parent
         self.sim = parent.sim if hasattr(parent, "sim") else parent
 
-    def reset(self, rng):
+    def reset_start(self, rng):
+        pass
+
+    def reset_end(self, rng):
         pass
     
-    def step(self, rng):
+    def step_start(self, rng):
+        pass
+
+    def step_end(self, rng):
         pass
 

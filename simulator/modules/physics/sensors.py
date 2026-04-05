@@ -68,13 +68,13 @@ class Sensors(Subsystem):
         for sensor in self._sensors.values():
             sensor.read()
 
-    def reset(self, rng):
+    def reset_end(self, rng):
         for sensor in self._sensors.values():
-            sensor.reset(rng)
+            sensor.reset_start(rng)
 
         self._read()
 
-    def step(self, rng):
+    def step_start(self, rng):
         for sensor in self._sensors.values():
-            sensor.step(rng)
+            sensor.step_start(rng)
         self._read()

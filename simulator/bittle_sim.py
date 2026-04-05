@@ -10,7 +10,9 @@ from simulator.core.robot_info import RobotInfo
 
 from simulator.core.registry import SubsystemRegistry
 
-
+from simulator.modules import Physics
+from simulator.modules.physics import Kinematics
+from simulator.modules.physics.kinematics_systems.foot_kinematics import FootKinematics
 
 
 
@@ -27,16 +29,7 @@ class BittleParameters:
 class BittleSimulator:
     """
     Simulator class for the Bittle quadruped robotic dog
-    """
-
-    # @dataclass
-    # class SimulatorStates:
-    #     def __init__(self, model, data):
-    #         self.phys = PhysicsState(model, data)
-    #         self.sim = SimulationState(model, data)
-
-            
-
+    """        
 
     NUM_JOINTS = 8          # Number of joints for quadruped
     NUM_IMU_OBS = 6         # Number of observations from IMU (Gyro: 3, Accel: 3)
@@ -60,27 +53,7 @@ class BittleSimulator:
             instance.initialize()
             self._systems[cls] = instance
             
-            #print('sim subsystem:', cls)
-            #print('sim subsystem instance:', instance)
 
-
-        #self.states = BittleSimulator.SimulatorStates(self.model, self.data)
-
-        # self.randomization = RandomizationController(modules=[
-        #     s_rnd.InitialPoseRandomizer(
-        #         sim=self
-        #     ),
-        #     s_rnd.JointRandomizer(
-        #         sim=self,
-        #         joint_qpos_ids=self.phys_context.robot_info.joint_qpos_ids
-        #     ),
-        #     s_rnd.JointHistoryRandomizer(
-        #         sim=self
-        #     ),
-        #     s_rnd.FrictionRandomizer(
-        #         sim=self
-        #     )
-        # ])
 
         self.options = {
             'bound_ang': 100
@@ -94,23 +67,43 @@ class BittleSimulator:
         mujoco.mj_resetData(self.model, self.data)
 
         for instance in self._systems.values():
-            instance.reset(rng)
+            instance.reset_start(rng)
 
-        #self.phys_context.kinematics.basis.update_rotation()
+        self.forward() # Ensure that the simulation state is consistent after reset
+
+        self.place_on_ground()
+
+        for instance in self._systems.values():
+            instance.reset_end(rng)
+
+        self.forward() 
+        
+
 
     def step(self, rng: np.random.Generator, action = None):
         if action is not None:
             self.data.ctrl[:] = action
 
+        for instance in self._systems.values():
+            instance.step_start(rng)
+
         for _ in range(self.n_substeps): # Simulate control updates
             mujoco.mj_step(self.model, self.data)
 
         for instance in self._systems.values():
-            instance.step(rng)
+            instance.step_end(rng)
 
         #self.phys_context.kinematics.basis.update_rotation()
 
     def forward(self):
         mujoco.mj_forward(self.model, self.data)
+
+    def place_on_ground(self):
+        paw_clearance = self.get(Physics).get(Kinematics).get(FootKinematics).paw_clearance()
+        self.data.qpos[2] -= np.min(paw_clearance)
+
+        self.data.qvel = 0
+
+        self.forward()
     
 

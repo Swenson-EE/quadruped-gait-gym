@@ -47,8 +47,8 @@ class BasisKinematics(Subsystem):
         return roll, pitch
 
 
-    def reset(self, rng):
+    def reset_end(self, rng):
         self.update_rotation()
 
-    def step(self, rng):
+    def step_start(self, rng):
         self.update_rotation()
