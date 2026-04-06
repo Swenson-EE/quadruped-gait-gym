@@ -1,6 +1,7 @@
 import gymnasium as gym
 import mujoco.viewer
 import time
+import numpy as np
 
 from environment.base_bittle_environment import BaseBittleEnvironment
 from environment.continuous_bittle_environment import ContinuousBittleEnvironment
@@ -15,6 +16,8 @@ def key_callback(keycode):
         step_flag = True
 
 if __name__ == "__main__":
+    np.set_printoptions(linewidth=120)
+
     env: BaseBittleEnvironment = None
     match ENVIRONMENT.lower():
         case 'c':
