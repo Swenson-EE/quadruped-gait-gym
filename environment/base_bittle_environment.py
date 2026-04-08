@@ -106,18 +106,23 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
 
         #print_comp("forward_movement")
-        
-        total_reward = 0
+
+        reward_total = 0
         if "reward" in self.weights:
-            #print("reward...")
             for k, v in reward.items():
-                total_reward += (self.weights.get(k, 0.0) * v)
+                reward_total += (self.weights.get(k, 0.0) * v)
 
+        penalty_total = 0
         if "penalty" in self.weights:
-            #print("penalty...")
             for k, v in penalty.items():
-                total_reward -= (self.weights.get(k, 0.0) * v)
+                penalty_total -= (self.weights.get(k, 0.0) * v)
 
+
+        reward_scale = self.weights.get("reward_scale", 1.0)
+        penalty_scale = self.weights.get("penalty_scale", 1.0)
+
+
+        total_reward = (reward_total * reward_scale) - (penalty_total * penalty_scale)
 
         # print('\n'*2, '-'*10)
         # print(reward)
