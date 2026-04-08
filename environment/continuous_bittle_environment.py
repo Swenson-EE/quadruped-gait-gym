@@ -15,8 +15,8 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
 
     
 
-    def __init__(self, parameters: ContinuousEnvironmentParameters = ContinuousEnvironmentParameters()):
-        super().__init__(parameters=parameters)
+    def __init__(self, parameters: ContinuousEnvironmentParameters = ContinuousEnvironmentParameters(), weights = {}):
+        super().__init__(parameters=parameters, weights=weights)
 
         self.action_space = gym.spaces.Box(
             # np.array([self.params.joint_min] * self.sim.NUM_JOINTS),

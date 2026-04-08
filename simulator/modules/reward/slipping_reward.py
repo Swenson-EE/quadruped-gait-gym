@@ -11,8 +11,7 @@ from simulator.modules.physics.kinematics_systems.foot_kinematics import FootKin
 class SlippingReward(RewardSubsystem):
 
     def initialize(self):
-        self._weight['penalty']['slipping'] = 0.1
-        self._weight['penalty']['paw_contacting'] = 10
+        pass
 
     def _get_components(self):
         

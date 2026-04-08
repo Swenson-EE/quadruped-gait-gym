@@ -14,7 +14,6 @@ class PawClearanceReward(RewardSubsystem):
     PAW_Z_THRESHOLD = 0.005
 
     def initialize(self):
-        self._weight['penalty']['paw_clearance'] = 1
         self._normalization_factor['penalty']['paw_clearance'] = 0.05
 
         self._reducers['penalty']['paw_clearance'] = lambda x: sum( [max(0, foot_z) for foot_z in x] )

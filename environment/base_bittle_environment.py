@@ -29,25 +29,6 @@ class EnvironmentParameters:
     episode_length: int = 250
     total_length: int = 1e6
 
-    normalization_factors: RewardNormalizationFactors = RewardNormalizationFactors(
-        position=10.0,
-        velocity=10.0,
-
-        jitter_1st_order=1.0,
-        jitter_2nd_order=0.5,
-
-        imu_gyro=100.0,
-        imu_accel=100.0,
-
-        paw_clearance=1.0,
-        paw_slipping=1.0,
-        num_arms_contacting=1.0,
-
-        roll=10.0,
-        pitch=10.0
-    )
-
-    rewards: Rewards = None
 
 
 T = TypeVar("T", bound=EnvironmentParameters)
@@ -55,13 +36,14 @@ T = TypeVar("T", bound=EnvironmentParameters)
 
 class BaseBittleEnvironment(gym.Env, Generic[T]):
 
-    def __init__(self, parameters: T = EnvironmentParameters()):
+    def __init__(self, parameters: T = EnvironmentParameters(), weights = {}):
         super().__init__()
 
         self.params = parameters
+        self.weights = weights
 
-        if self.params.rewards is None:
-            self.params.rewards = Rewards.from_json_file('config/rewards.json')
+        #if self.params.rewards is None:
+        #    self.params.rewards = Rewards.from_json_file('config/rewards.json')
         
 
         bittle_params = BittleParameters(
@@ -110,7 +92,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         info['reward'] = reward
         info['penalty'] = penalty
         info['observation'] = observation
-        info['components'] = sys_reward.get_normalized_components()
+        #info['components'] = sys_reward.get_normalized_components()
 
         def print_comp(name):
             print('-'*10, name, '-'*10)
@@ -122,8 +104,19 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
                 print(reward[name])
             print('\n'*2)
 
-        #print_comp('small_variance')
- 
+
+        #print_comp("forward_movement")
+        
+        total_reward = 0
+        if "reward" in self.weights:
+            #print("reward...")
+            for k, v in reward.items():
+                total_reward += (self.weights.get(k, 0.0) * v)
+
+        if "penalty" in self.weights:
+            #print("penalty...")
+            for k, v in penalty.items():
+                total_reward -= (self.weights.get(k, 0.0) * v)
 
 
         # print('\n'*2, '-'*10)
@@ -133,7 +126,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         # print('\n'*2, '-'*10)
         # print(info['components'])
 
-        total_reward = sum(reward.values()) - sum(penalty.values())
+        #total_reward = sum(reward.values()) - sum(penalty.values())
 
 
         terminated = False

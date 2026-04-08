@@ -14,19 +14,12 @@ import numpy as np
 class StabilityReward(RewardSubsystem):
 
     def initialize(self):
-        self._weight['penalty'] = {
-            'stability_angle': 1.0,
-            'stability_rate': 1.0
-        }
 
-        self._normalization_factor['penalty'] = {
-            'stability_rate': 0.1
-        }
+        self._normalization_factor['penalty']['stability_rate'] = 0.1
 
-        self._reducers['penalty'] = {
-            'stability_angle': np.sum,
-            'stability_rate': np.sum
-        }
+        self._reducers['penalty']['stability_angle'] = np.sum
+        self._reducers['penalty']['stability_rate'] = np.sum
+
 
     def _get_components(self):
         
@@ -42,8 +35,6 @@ class StabilityReward(RewardSubsystem):
 
         reward = None
         penalty = {
-            # "stability_angle": roll + pitch,
-            # "stability_rate": imu_gyro[0] + imu_gyro[1]
             "stability_angle": np.abs([roll, pitch]),
             "stability_rate": np.abs([imu_gyro[0], imu_gyro[1]])
         }

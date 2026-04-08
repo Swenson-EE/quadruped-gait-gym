@@ -16,11 +16,8 @@ class VelocityReward(RewardSubsystem):
     initial_rotation = None
 
     def initialize(self):
-        self._weight['penalty']['lateral'] = 1000
-        self._weight['penalty']['z_bounce'] = 1000
-
-        self._reducers['penalty']['lateral'] = lambda x: x**2
-        self._reducers['penalty']['z_bounce'] = lambda x: x**2
+        self._reducers['penalty']['lateral_velocity'] = lambda x: x**2
+        self._reducers['penalty']['z_velocity'] = lambda x: x**2
 
 
     def _get_rotation(self):
@@ -41,8 +38,8 @@ class VelocityReward(RewardSubsystem):
         
         reward = None
         penalty = {
-            "lateral": abs(velocity[1]),
-            "z_bounce": abs(velocity[2])
+            "lateral_velocity": abs(velocity[1]),
+            "z_velocity": abs(velocity[2])
         }
 
         return reward, penalty

@@ -14,10 +14,6 @@ class RewardSubsystem(Subsystem):
             "reward": {},
             "penalty": {}
         }
-        self._weight = {
-            "reward": {},
-            "penalty": {}
-        }
 
         self._reducers = {
             "reward": {},
@@ -52,13 +48,12 @@ class RewardSubsystem(Subsystem):
             {
                 k: (
                     reducers.get(k, lambda x: x)(v / norm.get(k, 1.0))
-                ) * weight.get(k, 1.0)
+                )
                 for k, v in (comp or {}).items()
             } if comp is not None else None
-            for comp, norm, weight, reducers in zip(
+            for comp, norm, reducers in zip(
                 components,
                 (self._normalization_factor["reward"], self._normalization_factor["penalty"]),
-                (self._weight["reward"], self._weight["penalty"]),
                 (self._reducers["reward"], self._reducers["penalty"])
             )
         )

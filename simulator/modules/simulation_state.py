@@ -14,8 +14,10 @@ class SimulationState(ModularSubsystem):
     joints = None
 
     def initialize(self):
+        length_history = self.sim.params.length_joint_history
+        
         self.joints = AngleTransformableBuffer(
-            size=(20, 8),
+            size=(length_history, 8),
             scale=100.0
         )
 

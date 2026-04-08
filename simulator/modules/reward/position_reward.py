@@ -18,13 +18,13 @@ class PositionReward(RewardSubsystem):
     initial_rotation = None
 
     def initialize(self):
-        self._weight['reward']['movement'] = 1
-        self._weight['penalty']['movement'] = 100
+        #self.total_distance = np.zeros(shape=(3,))
 
-        self._normalization_factor['reward']['movement'] = 0.01
-        self._normalization_factor['penalty']['movement'] = 0.01
+        self._normalization_factor['reward']['forward_movement'] = 0.01
+        self._normalization_factor['penalty']['lateral_movement'] = 0.01
+        self._normalization_factor['penalty']['z_movement'] = 0.01
 
-        self._reducers['penalty']['movement'] = np.sum
+        
 
 
     def _get_rotation(self):
@@ -34,6 +34,9 @@ class PositionReward(RewardSubsystem):
     def _get_position(self):
         kn_world = self.sim.get(Physics).get(Kinematics).get(WorldKinematics)
         return kn_world.get_position().copy()
+
+    def reset_start(self, rng):
+        self.total_distance = np.zeros(shape=(3,))
 
     def reset_end(self, rng):
         self._initial_rotation = self._get_rotation()
@@ -46,14 +49,19 @@ class PositionReward(RewardSubsystem):
         #self.position_change = self._initial_rotation.T @ (self._get_position() - self.last_position)
         self.position_change = self._get_position() - self.last_position
 
+        # forward should be always forward, but lateral and z should be total for penalties
+        #self.total_distance += [self.position_change[0], abs(self.position_change[1]), abs(self.position_change[2])]
+
+
 
     def _get_components(self):
         reward = {
-            "movement": self.position_change[0]
+            "forward_movement": -self.position_change[0] # To match the joint direction to be positive
         }
 
         penalty = {
-            "movement": np.array(self.position_change[1], self.position_change[2])
+            "lateral_movement": abs(self.position_change[1]),
+            "z_movement": abs(self.position_change[2])
         }
 
         return reward, penalty

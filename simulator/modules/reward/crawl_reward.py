@@ -10,7 +10,6 @@ from simulator.modules.physics_module import Physics
 class CrawlReward(RewardSubsystem):
     
     def initialize(self):
-        self._weight['penalty']['crawling'] = 0.0
         self._normalization_factor['penalty']['crawling'] = 1.0
         
 

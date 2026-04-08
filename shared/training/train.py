@@ -5,6 +5,7 @@ from runner.training_job import TrainingJob, training_job_parser
 from shared.training.training_status import TrainingStatus
 
 import numpy as np
+import json
 
 
 def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
@@ -17,10 +18,21 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         print(training_job)
         print("-" * 30)
 
+        
+        weights = None
+        with open("config/reward_weights.json") as file:
+            weights = json.load(file)
+            
+
         from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
-        env = get_algo_vec_environment(training_job.algo, training_job.parallel_env, parameters=EnvironmentParameters(
-            total_length=training_job.total_steps
-        ))
+        env = get_algo_vec_environment(
+            training_job.algo, 
+            training_job.parallel_env, 
+            parameters=EnvironmentParameters(
+                total_length=training_job.total_steps
+            ),
+            weights=weights or {}
+        )
         if env is None:
             return (TrainingStatus.NO_ENV, "No environment instantiated")
         

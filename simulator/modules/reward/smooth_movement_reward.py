@@ -11,9 +11,6 @@ import numpy as np
 class SmoothMovementReward(RewardSubsystem):
 
     def initialize(self):
-        self._weight['penalty']['jitter_1st'] = 1.0
-        self._weight['penalty']['jitter_2nd'] = 1.0
-
         self._normalization_factor['penalty'] = {
             'jitter_1st': 0.1,
             'jitter_2nd': 0.1

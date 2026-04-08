@@ -14,26 +14,16 @@ class JointVarianceReward(RewardSubsystem):
     _joint_max = 45
 
     def initialize(self):
-        # self._weight['penalty']['joint_variance'] = 10
-        # self._normalization_factor['penalty']['joint_variance'] = 500
-        # self._reducers['penalty']['joint_variance'] = lambda x: np.sum(
-        #     x[(x < self._joint_min) | (x > self._joint_max)]
-        # )
-        self._weight["penalty"] = {
-            "small_variance": 20,
-            "large_variance": 10
-        }
-
         self._normalization_factor["penalty"] = {
-            "small_variance": self._joint_min,
-            "large_variance": self._joint_max
+            "small_joint_variance": self._joint_min,
+            "large_joint_variance": self._joint_max
         }
 
         self._reducers["penalty"] = {
-            "small_variance": lambda x: np.sum(
+            "small_joint_variance": lambda x: np.sum(
                 1 - x[(x < 1)]
             ),
-            "large_variance": lambda x: np.sum(
+            "large_joint_variance": lambda x: np.sum(
                 x[x > 1]
             )
         }
@@ -45,8 +35,8 @@ class JointVarianceReward(RewardSubsystem):
 
         reward = None
         penalty = {
-            "small_variance": joint_variance,
-            "large_variance": joint_variance
+            "small_joint_variance": joint_variance,
+            "large_joint_variance": joint_variance
         }
 
         return reward, penalty

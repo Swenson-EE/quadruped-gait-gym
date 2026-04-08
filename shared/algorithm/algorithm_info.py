@@ -55,7 +55,7 @@ def get_algo_environment(algo: Algorithm, parameters: EnvironmentParameters = En
 
 
 
-def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: EnvironmentParameters = EnvironmentParameters()):
+def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: EnvironmentParameters = EnvironmentParameters(), weights = {}):
 
     
     env: BaseBittleEnvironment = None
@@ -70,7 +70,7 @@ def get_algo_vec_environment(algo: Algorithm, parallel_env: int, parameters: Env
 
         env = make_vec_env(
             #lambda: DeltaActionWrapper(env=algo_env_class(parameters=parameters), max_delta=45),
-            lambda: algo_env_class(parameters=parameters),
+            lambda: algo_env_class(parameters=parameters, weights=weights),
             n_envs=parallel_env,
             vec_env_cls=SubprocVecEnv
         )
