@@ -1,4 +1,8 @@
 import gymnasium as gym
+from stable_baselines3.common.monitor import Monitor
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
 import optuna
 import optuna.visualization as vis
@@ -11,12 +15,31 @@ from shared.utils.dataclass_parser import build_parser_from_dataclass, parse_arg
 
 
 
+LOG_DIR = "saved/optimization"
+EXCEL_PATH = "training_runs.xlsx"
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
+
 
 @dataclass 
 class OptimizeArguments:
     algorithm: Algorithm = Algorithm.PPO_C
+    n_trials: int = 100
+    n_jobs: int = 1
 
 optimize_arguments_parser = build_parser_from_dataclass(OptimizeArguments)
+
+
+def append_to_excel(df, path=os.path.join(LOG_DIR, EXCEL_PATH)):
+    if not os.path.exists(path):
+        df.to_excel(path, index=False)
+    else:
+        with pd.ExcelWriter(path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
+            existing = pd.read_excel(path)
+
+            combined = pd.concat([existing, df], ignore_index=True)
+            combined.to_excel(writer, index=False)
 
 
 # ENVIRONMENT FACTORY
@@ -100,27 +123,65 @@ def evaluate(model, env, n_episodes = 5):
 def objective(trial):
     weights = sample_weights(trial)
 
+    trial_id = f"trial_{trial.number}"
+    monitor_dir = os.path.join(LOG_DIR, "monitors")
+    os.makedirs(monitor_dir, exist_ok=True)
+
     environment_class, model_class, model_parameters = make_env()
 
-    env = environment_class(weights = weights)
+
+    monitor_file = os.path.join(monitor_dir, f"monitor_{trial_id}")
+    env = Monitor(
+        environment_class(weights = weights),
+        filename=monitor_file
+    )
 
     model = model_class(
         'MultiInputPolicy',
         env,
+        seed=42,
         **model_parameters,
         verbose=0
     )
 
     model.learn(total_timesteps=100_000)
 
-    return evaluate(model, env)
+    score = evaluate(model, env)
+
+    # Load monitor data
+    df = pd.read_csv(monitor_file + ".monitor.csv", skiprows=1)
+
+    df["trial"] = trial.number
+    df["score"] = score
+
+    for k, v in trial.params.items():
+        df[k] = v
+
+    # Append to excel
+    append_to_excel(df)
 
 
+    return score
+
+
+def plot_trials():
+    df = pd.read_excel(os.path.join(LOG_DIR, EXCEL_PATH))
+
+    for trial_id, group in df.groupby("trial"):
+        plt.plot(group["r"], label=f"Trial {trial_id}")
+
+    plt.xlabel("Episode")
+    plt.ylabel("Reward")
+    plt.title("Training Curves per Trial")
+    plt.legend()
     
+    plt.savefig(os.path.join(LOG_DIR,"training_curves.png"), dpi=300, bbox_inches="tight")
+
+    #plt.show()
 
 
 # MAIN LOOP
-def main():
+def main(args: OptimizeArguments):
     study = optuna.create_study(
         direction="maximize",
         pruner=optuna.pruners.MedianPruner()
@@ -128,8 +189,8 @@ def main():
 
     study.optimize(
         objective,
-        n_trials=50,
-        n_jobs=1 # increase for parallel jobs
+        n_trials=args.n_trials,
+        n_jobs=args.n_jobs # increase for parallel jobs
     )
 
     print("\n", "="*5, " [BEST RESULT] ", "="*5)
@@ -138,22 +199,31 @@ def main():
 
     # Optimization history
     fig = vis.plot_optimization_history(study)
-    fig.write_image("saved/optimization_history.png")
+    fig.write_image(os.path.join(LOG_DIR, "optimization_history.png"))
 
     # Parameter importance
     fig = vis.plot_param_importances(study)
-    fig.write_image("saved/param_importances.png")
+    fig.write_image(os.path.join(LOG_DIR, "param_importances.png"))
 
     # Parallel coordinate
     fig = vis.plot_parallel_coordinate(study)
-    fig.write_image("saved/parallel_coordinates.png")
+    fig.write_image(os.path.join(LOG_DIR, "parallel_coordinates.png"))
+
+
+    plot_trials()
+
 
 
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
     
+    print("#"*10, f"[TRAINING {args.algorithm.value.upper()}]", "#"*10)
+    print(args.n_trials, "trials")
+    print(args.n_jobs, "jobs")
+    print('\n')
+
     global algorithm
     algorithm = args.algorithm
 
-    main()
+    main(args)
 
