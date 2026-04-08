@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 import optuna
+import optuna.visualization as vis
 
 from dataclasses import dataclass
 
@@ -36,7 +37,8 @@ def normalize(d):
 def sample_weights(trial):
     weights = {
         "reward": {
-            "forward_movement": trial.suggest_float("forward_movement", 0.1, 3.0, log=True),
+            #"forward_movement": trial.suggest_float("forward_movement", 0.1, 3.0, log=True),
+            "efficiency": trial.suggest_float("efficiency", 0.1, 5.0, log=True)
         },
         "penalty": {
             "lateral_movement": trial.suggest_float("lateral_movement", 0.1, 5.0, log=True),
@@ -133,6 +135,18 @@ def main():
     print("\n", "="*5, " [BEST RESULT] ", "="*5)
     print("Score:", study.best_value)
     print("Weights:", study.best_params)
+
+    # Optimization history
+    fig = vis.plot_optimization_history(study)
+    fig.write_image("saved/optimization_history.png")
+
+    # Parameter importance
+    fig = vis.plot_param_importances(study)
+    fig.write_image("saved/param_importances.png")
+
+    # Parallel coordinate
+    fig = vis.plot_parallel_coordinate(study)
+    fig.write_image("saved/parallel_coordinates.png")
 
 
 if __name__ == "__main__":

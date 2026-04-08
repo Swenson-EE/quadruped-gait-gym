@@ -24,7 +24,7 @@ class PositionReward(RewardSubsystem):
         self._normalization_factor['penalty']['lateral_movement'] = 0.01
         self._normalization_factor['penalty']['z_movement'] = 0.01
 
-        
+    
 
 
     def _get_rotation(self):
@@ -56,16 +56,28 @@ class PositionReward(RewardSubsystem):
 
     def _get_components(self):
         reward = {
-            "forward_movement": -self.position_change[0] # To match the joint direction to be positive
+            "forward_movement": self.dx,
+            "efficiency": self.dx / (abs(self.dy) + abs(self.dz) + 1e-6)
         }
 
         penalty = {
-            "lateral_movement": abs(self.position_change[1]),
-            "z_movement": abs(self.position_change[2])
+            "lateral_movement": abs(self.dy),
+            "z_movement": abs(self.dz)
         }
 
         return reward, penalty
     
 
+    @property
+    def dx(self):
+        return -self.position_change[0]     # To match the joint direction to be positive
+
+    @property
+    def dy(self):
+        return self.position_change[1]
     
+    @property
+    def dz(self):
+        return self.position_change[2]
+
 
