@@ -2,6 +2,7 @@ import gymnasium as gym
 import mujoco.viewer
 import time
 import numpy as np
+import json
 
 from environment.base_bittle_environment import BaseBittleEnvironment
 from environment.continuous_bittle_environment import ContinuousBittleEnvironment
@@ -18,10 +19,15 @@ def key_callback(keycode):
 if __name__ == "__main__":
     np.set_printoptions(linewidth=120)
 
+    weights = {}
+    with open("config/reward_weights.json") as file:
+        weights = json.load(file)
+        
+
     env: BaseBittleEnvironment = None
     match ENVIRONMENT.lower():
         case 'c':
-            env = ContinuousBittleEnvironment()
+            env = ContinuousBittleEnvironment(weights=weights)
         case _:
             print(f"Invalid environment type {ENVIRONMENT}")
             exit()

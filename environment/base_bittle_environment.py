@@ -110,12 +110,12 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         reward_total = 0
         if "reward" in self.weights:
             for k, v in reward.items():
-                reward_total += (self.weights.get(k, 0.0) * v)
+                reward_total += (self.weights["reward"].get(k, 0.0) * v)
 
         penalty_total = 0
         if "penalty" in self.weights:
             for k, v in penalty.items():
-                penalty_total -= (self.weights.get(k, 0.0) * v)
+                penalty_total -= (self.weights["penalty"].get(k, 0.0) * v)
 
 
         reward_scale = self.weights.get("reward_scale", 1.0)
