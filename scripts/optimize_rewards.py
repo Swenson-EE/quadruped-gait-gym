@@ -1,3 +1,5 @@
+import json
+
 import gymnasium as gym
 from stable_baselines3.common.monitor import Monitor
 import os
@@ -67,7 +69,7 @@ def sample_weights(trial):
             "lateral_movement": trial.suggest_float("lateral_movement", 0.1, 5.0, log=True),
             "z_movement": trial.suggest_float("z_movement", 0.1, 5.0, log=True),
             "crawling": trial.suggest_float("crawling", 0.1, 3.0, log=True),
-            "small_joint_variance": trial.suggest_float("small_joint_variance", 0.1, 3.0, log=True),
+            #"small_joint_variance": trial.suggest_float("small_joint_variance", 0.1, 3.0, log=True),
             "large_joint_variance": trial.suggest_float("large_joint_variance", 0.5, 5.0, log=True),
             "paw_clearance": trial.suggest_float("paw_clearance", 0.1, 3.0, log=True),
             "slipping": trial.suggest_float("slipping", 0.1, 3.0, log=True),
@@ -77,7 +79,10 @@ def sample_weights(trial):
             "stability_angle": trial.suggest_float("stability_angle", 0.1, 3.0, log=True),
             "stability_rate": trial.suggest_float("stability_rate", 0.1, 3.0, log=True),
             "lateral_velocity": trial.suggest_float("lateral_velocity", 0.5, 10.0, log=True),
-            "z_velocity": trial.suggest_float("z_velocity", 0.5, 10.0, log=True)    
+            "z_velocity": trial.suggest_float("z_velocity", 0.5, 10.0, log=True),
+            "action_smooth": trial.suggest_float("action_smooth", 0.1, 3.0, log=True), 
+            "joint_velocity": trial.suggest_float("joint_velocity", 0.1, 3.0, log=True),    
+            "joint_accel": trial.suggest_float("joint_accel", 0.1, 3.0, log=True), 
         },
         "reward_scale": trial.suggest_float("reward_scale", 0.1, 3.0, log=True),
         "penalty_scale": trial.suggest_float("penalty_scale", 0.1, 3.0, log=True)
@@ -173,7 +178,7 @@ def plot_trials():
     plt.xlabel("Episode")
     plt.ylabel("Reward")
     plt.title("Training Curves per Trial")
-    plt.legend()
+    #plt.legend()
     
     plt.savefig(os.path.join(LOG_DIR,"training_curves.png"), dpi=300, bbox_inches="tight")
 
@@ -197,6 +202,14 @@ def main(args: OptimizeArguments):
     print("Score:", study.best_value)
     print("Weights:", study.best_params)
 
+    rounded_weights = {
+        k: (round(v, 2) if isinstance(v, float) else v) for k, v in study.best_params 
+    }
+
+    with open(os.path.join(LOG_DIR, "weights.json")) as f:
+        json.dump(rounded_weights)
+
+
     # Optimization history
     fig = vis.plot_optimization_history(study)
     fig.write_image(os.path.join(LOG_DIR, "optimization_history.png"))
@@ -208,7 +221,7 @@ def main(args: OptimizeArguments):
     # Parallel coordinate
     fig = vis.plot_parallel_coordinate(study)
     fig.write_image(os.path.join(LOG_DIR, "parallel_coordinates.png"))
-
+    
 
     plot_trials()
 
