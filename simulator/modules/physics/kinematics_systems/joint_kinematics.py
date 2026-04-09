@@ -15,7 +15,8 @@ class JointKinematics(Subsystem):
 
     def get_angles(self, units = 'deg') -> np.ndarray:
         # Get joint angles (rad)
-        joint_angles = self.data.qpos[self._joint_qpos_ids]
+        #joint_angles = self.data.qpos[self._joint_qpos_ids]
+        joint_angles = self.data.qpos[7:15]
         
         if units == 'deg':
             joint_angles = np.rad2deg(joint_angles)
@@ -25,3 +26,5 @@ class JointKinematics(Subsystem):
     def set_angles(self, angles: np.ndarray):
         self.data.qpos[7:15] = angles
 
+    def get_velocities(self):
+        return self.data.qvel[7:15]

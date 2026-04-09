@@ -28,10 +28,10 @@ class Modular(Node):
         for module in self._modules.values():
             module.reset_end(rng)
 
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         for module in self._modules.values():
-            module.step_start(rng)
+            module.step_start(rng, action)
 
-    def step_end(self, rng):
+    def step_end(self, rng, action):
         for module in self._modules.values():
-            module.step_end(rng)
+            module.step_end(rng, action)

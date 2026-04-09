@@ -85,13 +85,13 @@ class BittleSimulator:
             self.data.ctrl[:] = action
 
         for instance in self._systems.values():
-            instance.step_start(rng)
+            instance.step_start(rng, action)
 
         for _ in range(self.n_substeps): # Simulate control updates
             mujoco.mj_step(self.model, self.data)
 
         for instance in self._systems.values():
-            instance.step_end(rng)
+            instance.step_end(rng, action)
 
         #self.phys_context.kinematics.basis.update_rotation()
 

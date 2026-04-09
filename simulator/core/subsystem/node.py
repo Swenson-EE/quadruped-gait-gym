@@ -19,9 +19,9 @@ class Node:
     def reset_end(self, rng):
         pass
     
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         pass
 
-    def step_end(self, rng):
+    def step_end(self, rng, action):
         pass
 

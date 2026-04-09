@@ -15,7 +15,7 @@ class NoisySensorModel(SensorModel):
     def reset_start(self, rng):
         self._bias = rng.normal(0, self._bias_std, size=self._shape)
 
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         self._noise = rng.normal(0, self._std, size=self._shape)
 
     def _get_value(self):

@@ -74,7 +74,7 @@ class Sensors(Subsystem):
 
         self._read()
 
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         for sensor in self._sensors.values():
-            sensor.step_start(rng)
+            sensor.step_start(rng, action)
         self._read()

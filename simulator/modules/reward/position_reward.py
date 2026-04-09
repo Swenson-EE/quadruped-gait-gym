@@ -41,11 +41,11 @@ class PositionReward(RewardSubsystem):
     def reset_end(self, rng):
         self._initial_rotation = self._get_rotation()
 
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         self.last_position = self._get_position()
         
 
-    def step_end(self, rng):
+    def step_end(self, rng, action):
         #self.position_change = self._initial_rotation.T @ (self._get_position() - self.last_position)
         self.position_change = self._get_position() - self.last_position
 
@@ -56,7 +56,7 @@ class PositionReward(RewardSubsystem):
 
     def _get_components(self):
         reward = {
-            "forward_movement": self.dx,
+            #"forward_movement": self.dx,
             "efficiency": self.dx / (abs(self.dy) + abs(self.dz) + 1e-6)
         }
 

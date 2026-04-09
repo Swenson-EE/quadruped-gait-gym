@@ -24,7 +24,7 @@ class SimulationState(ModularSubsystem):
     def reset_start(self, rng):
         self.joints.clear()
 
-    def step_end(self, rng):
+    def step_end(self, rng, action):
         kinematics = self.sim.get(Physics).get(Kinematics)
         kn_joint = kinematics.get(JointKinematics)
 

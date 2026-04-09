@@ -50,5 +50,5 @@ class BasisKinematics(Subsystem):
     def reset_end(self, rng):
         self.update_rotation()
 
-    def step_start(self, rng):
+    def step_start(self, rng, action):
         self.update_rotation()

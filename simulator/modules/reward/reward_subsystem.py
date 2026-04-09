@@ -29,20 +29,7 @@ class RewardSubsystem(Subsystem):
 
     
     def get(self):
-        #reward, penalty = (self._get_components() / self._normalization_factor) * self._weight
-        
         components = self._get_components()
-        # reward, penalty = (
-        #     {
-        #         k: (v / norm.get(k, 1.0)) * weight.get(k, 1.0)
-        #         for k, v in (comp or {}).items()
-        #     } if comp is not None else None
-        #     for comp, norm, weight in zip(
-        #         components,
-        #         (self._normalization_factor["reward"], self._normalization_factor["penalty"]),
-        #         (self._weight["reward"], self._weight["penalty"])
-        #     )
-        # )
 
         reward, penalty = (
             {
@@ -59,20 +46,5 @@ class RewardSubsystem(Subsystem):
         )
 
         return reward, penalty
-
-    def get_normalized(self):
-        components = self._get_components()
-
-        reward, penalty = (
-            {
-                k: (
-                    v / norm.get(k, 1.0) 
-                ) for k, v in (comp or {}).items()
-            } if comp is not None else None
-            for comp, norm in zip(
-                components,
-                (self._normalization_factor['reward'], self._normalization_factor['penalty'])
-            )
-        )
-
-        return reward, penalty
+    
+    
