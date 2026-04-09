@@ -39,8 +39,8 @@
         />
 
         <!-- Main body -->
-        <body name="torso" pos="0 0 0.25">
-            <geom type="box" size="0.12 0.05 0.025" rgba="0.3 0.3 0.8 1" />
+        <body name="torso" pos="0 0 0.2">
+            <geom type="box" size="0.125 0.085 0.02" rgba="0.3 0.3 0.8 1" />
             
             <freejoint />
 
@@ -48,66 +48,70 @@
             <site name="imu" pos="0 0 0" size="0.01" />
 
             <!-- Front Left Leg -->
-            <body name="front_left_hip" pos="0.10 0.05 0">
+            <body name="front_left_hip" pos="0.105 0.08 -0.015">
                 <joint name="front_left_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                <!-- [UPPER LEG LENGTH] -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.065" size="0.015"/>
 
-                <body name="front_left_knee" pos="0 0 -0.10">
+                <body name="front_left_knee" pos="0 0 -0.065">
                     <joint name="front_left_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                    <geom name="front_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                    <geom name="front_left_lower" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.015"/>
 
-                    <geom name="front_left_foot" type="sphere" pos="0 0 -0.10" size="0.02"/>
-                    <site name="front_left_foot_site" pos="0 0 -0.10" size="0.005"/>
+                    <geom rgba="1 0.3 0.3 1" name="front_left_foot" type="sphere" pos="0 0 -0.06" size="0.02"/>
+                    <site name="front_left_foot_site" pos="0 0 -0.075" size="0.005"/>
                 </body>
             </body>
 
             <!-- Front Right Leg -->
-            <body name="front_right_hip" pos="0.10 -0.05 0">
+            <body name="front_right_hip" pos="0.105 -0.08 -0.015">
                 <joint name="front_right_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                <!-- [UPPER LEG LENGTH] -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.065" size="0.015"/>
 
-                <body name="front_right_knee" pos="0 0 -0.10">
+                <body name="front_right_knee" pos="0 0 -0.065">
                     <joint name="front_right_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
+            
+                    <geom name="front_right_lower" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.015"/>
 
-                    <geom name="front_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
-
-                    <geom name="front_right_foot" type="sphere" pos="0 0 -0.10" size="0.02"/>
-                    <site name="front_right_foot_site" pos="0 0 -0.10" size="0.005"/>
+                    <geom rgba="1 0.3 0.3 1" name="front_right_foot" type="sphere" pos="0 0 -0.06" size="0.02"/>
+                    <site name="front_right_foot_site" pos="0 0 -0.075" size="0.005"/>
                 </body>
             </body>
 
             <!-- Back Left Leg -->
-            <body name="back_left_hip" pos="-0.10 0.05 0">
+            <body name="back_left_hip" pos="-0.105 0.08 -0.015">
                 <joint name="back_left_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                <!-- [UPPER LEG LENGTH] -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.065" size="0.015"/>
 
-                <body name="back_left_knee" pos="0 0 -0.10">
+                <body name="back_left_knee" pos="0 0 -0.065">
                     <joint name="back_left_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                    <geom name="back_left_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                    <geom name="back_left_lower" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.015"/>
 
-                    <geom name="back_left_foot" type="sphere" pos="0 0 -0.10" size="0.02"/>
-                    <site name="back_left_foot_site" pos="0 0 -0.10" size="0.005"/>
+                    <geom rgba="1 0.3 0.3 1" name="back_left_foot" type="sphere" pos="0 0 -0.06" size="0.02"/>
+                    <site name="back_left_foot_site" pos="0 0 -0.075" size="0.005"/>
                 </body>
             </body>
 
             <!-- Back Right Leg -->
-            <body name="back_right_hip" pos="-0.10 -0.05 0">
+            <body name="back_right_hip" pos="-0.105 -0.08 -0.015">
                 <joint name="back_right_hip_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                <geom type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                <!-- [UPPER LEG LENGTH] -->
+                <geom type="capsule" fromto="0 0 0 0 0 -0.065" size="0.015"/>
 
-                <body name="back_right_knee" pos="0 0 -0.10">
+                <body name="back_right_knee" pos="0 0 -0.065">
                     <joint name="back_right_knee_joint" axis="0 1 0" range="-1.0472 1.0472"/>
 
-                    <geom name="back_right_lower" type="capsule" fromto="0 0 0 0 0 -0.10" size="0.02"/>
+                    <geom name="back_right_lower" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.015"/>
 
-                    <geom name="back_right_foot" type="sphere" pos="0 0 -0.10" size="0.02"/>
-                    <site name="back_right_foot_site" pos="0 0 -0.10" size="0.005"/>
+                    <geom rgba="1 0.3 0.3 1" name="back_right_foot" type="sphere" pos="0 0 -0.06" size="0.02"/>
+                    <site name="back_right_foot_site" pos="0 0 -0.075" size="0.005"/>
                 </body>
             </body>
         </body>
