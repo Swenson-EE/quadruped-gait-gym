@@ -7,9 +7,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import optuna
+from optuna.samplers import TPESampler
 import optuna.visualization as vis
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, asdict, is_dataclass
 
 from shared.algorithm.algorithm_types import Algorithm
 from shared.algorithm.algorithm_info import get_algorithm_class, get_algo_model
@@ -31,6 +32,83 @@ class OptimizeArguments:
     n_jobs: int = 1
 
 optimize_arguments_parser = build_parser_from_dataclass(OptimizeArguments)
+
+
+LOW = 0.1
+HIGH = 5.0
+
+@dataclass
+class Weights:
+    @dataclass
+    class Reward:
+        efficiency: float
+
+    @dataclass
+    class Penalty:
+        lateral_movement: float
+        z_movement: float
+        crawling: float
+        large_joint_variance: float
+        paw_clearance: float
+        slipping: float
+        paws_contacting: float
+        jitter_1st: float
+        jitter_2nd: float
+        stability_angle: float
+        stability_rate: float
+        lateral_velocity: float
+        z_velocity: float
+        action_smooth: float
+        joint_velocity: float
+        joint_acceleration: float
+        joint_jerk: float
+        joint_energy: float
+
+    reward: Reward
+    penalty: Penalty
+
+    reward_scale: float
+    penalty_scale: float
+
+    @classmethod
+    def from_flat_dict(cls, flat: dict) -> "Weights":
+        flat = {
+            k: (round(v, 2) if isinstance(v, float) else v) for k, v in flat.items() 
+        }
+
+        reward_fields = {f.name for f in fields(Weights.Reward)}
+        penalty_fields = {f.name for f in fields(Weights.Penalty)}
+        root_fields = {f.name for f in fields(Weights)} - {"reward", "penalty"}
+
+        reward_data = {k: v for k, v in flat.items() if k in reward_fields}
+        penalty_data = {k: v for k, v in flat.items() if k in penalty_fields}
+        root_data = {k: v for k, v in flat.items() if k in root_fields}
+
+        return cls(
+            reward=Weights.Reward(**reward_data),
+            penalty=Weights.Penalty(**penalty_data),
+            **root_data
+        )
+
+    @classmethod
+    def suggest(cls, trial: optuna.trial):
+        def suggest_from_dataclass(dc_cls):
+            result = {}
+
+            for f in fields(dc_cls):
+                name = f.name
+
+                # Nested dataclass (Reward / Penalty)
+                if is_dataclass(f.type):
+                    result[name] = suggest_from_dataclass(f.type)
+                # Leaf parameter
+                else:
+                    result[name] = trial.suggest_float(name, LOW, HIGH, log=True)
+
+            return result
+
+        return suggest_from_dataclass(cls)
+
 
 
 def append_to_excel(df, path=os.path.join(LOG_DIR, EXCEL_PATH)):
@@ -60,33 +138,38 @@ def normalize(d):
 
 # WEIGHT SAMPLING
 def sample_weights(trial):
-    weights = {
-        "reward": {
-            #"forward_movement": trial.suggest_float("forward_movement", 0.1, 3.0, log=True),
-            "efficiency": trial.suggest_float("efficiency", 0.1, 5.0, log=True)
-        },
-        "penalty": {
-            "lateral_movement": trial.suggest_float("lateral_movement", 0.1, 5.0, log=True),
-            "z_movement": trial.suggest_float("z_movement", 0.1, 5.0, log=True),
-            "crawling": trial.suggest_float("crawling", 0.1, 3.0, log=True),
-            #"small_joint_variance": trial.suggest_float("small_joint_variance", 0.1, 3.0, log=True),
-            "large_joint_variance": trial.suggest_float("large_joint_variance", 0.5, 5.0, log=True),
-            "paw_clearance": trial.suggest_float("paw_clearance", 0.1, 3.0, log=True),
-            "slipping": trial.suggest_float("slipping", 0.1, 3.0, log=True),
-            "paws_contacting": trial.suggest_float("paws_contacting", 0.1, 3.0, log=True),
-            "jitter_1st": trial.suggest_float("jitter_1st", 0.5, 5.0, log=True),
-            "jitter_2nd": trial.suggest_float("jitter_2nd", 0.5, 5.0, log=True),
-            "stability_angle": trial.suggest_float("stability_angle", 0.1, 3.0, log=True),
-            "stability_rate": trial.suggest_float("stability_rate", 0.1, 3.0, log=True),
-            "lateral_velocity": trial.suggest_float("lateral_velocity", 0.5, 10.0, log=True),
-            "z_velocity": trial.suggest_float("z_velocity", 0.5, 10.0, log=True),
-            "action_smooth": trial.suggest_float("action_smooth", 0.1, 3.0, log=True), 
-            "joint_velocity": trial.suggest_float("joint_velocity", 0.1, 3.0, log=True),    
-            "joint_accel": trial.suggest_float("joint_accel", 0.1, 3.0, log=True), 
-        },
-        "reward_scale": trial.suggest_float("reward_scale", 0.1, 3.0, log=True),
-        "penalty_scale": trial.suggest_float("penalty_scale", 0.1, 3.0, log=True)
-    }
+    # weights = {
+    #     "reward": {
+    #         #"forward_movement": trial.suggest_float("forward_movement", 0.1, 3.0, log=True),
+    #         "efficiency": trial.suggest_float("efficiency", 0.1, 5.0, log=True)
+    #     },
+    #     "penalty": {
+    #         "lateral_movement": trial.suggest_float("lateral_movement", 0.1, 5.0, log=True),
+    #         "z_movement": trial.suggest_float("z_movement", 0.1, 5.0, log=True),
+    #         "crawling": trial.suggest_float("crawling", 0.1, 3.0, log=True),
+    #         #"small_joint_variance": trial.suggest_float("small_joint_variance", 0.1, 3.0, log=True),
+    #         "large_joint_variance": trial.suggest_float("large_joint_variance", 0.5, 5.0, log=True),
+    #         "paw_clearance": trial.suggest_float("paw_clearance", 0.1, 3.0, log=True),
+    #         "slipping": trial.suggest_float("slipping", 0.1, 3.0, log=True),
+    #         "paws_contacting": trial.suggest_float("paws_contacting", 0.1, 3.0, log=True),
+    #         "jitter_1st": trial.suggest_float("jitter_1st", 0.5, 5.0, log=True),
+    #         "jitter_2nd": trial.suggest_float("jitter_2nd", 0.5, 5.0, log=True),
+    #         "stability_angle": trial.suggest_float("stability_angle", 0.1, 3.0, log=True),
+    #         "stability_rate": trial.suggest_float("stability_rate", 0.1, 3.0, log=True),
+    #         "lateral_velocity": trial.suggest_float("lateral_velocity", 0.5, 10.0, log=True),
+    #         "z_velocity": trial.suggest_float("z_velocity", 0.5, 10.0, log=True),
+    #         "action_smooth": trial.suggest_float("action_smooth", 0.1, 3.0, log=True), 
+    #         "joint_velocity": trial.suggest_float("joint_velocity", 0.1, 3.0, log=True),    
+    #         "joint_acceleration": trial.suggest_float("joint_acceleration", 0.1, 3.0, log=True), 
+    #         "joint_jerk": trial.suggest_float("joint_jerk", 0.1, 3.0, log=True), 
+    #         "joint_energy": trial.suggest_float("joint_energy", 0.1, 3.0, log=True), 
+
+    #     },
+    #     "reward_scale": trial.suggest_float("reward_scale", 0.1, 3.0, log=True),
+    #     "penalty_scale": trial.suggest_float("penalty_scale", 0.1, 3.0, log=True)
+    # }
+    weights = Weights.suggest(trial)
+    print('weights:', weights)
 
     weights["reward"] = normalize(weights["reward"])
     weights["penalty"] = normalize(weights["penalty"])
@@ -188,7 +271,11 @@ def plot_trials():
 # MAIN LOOP
 def main(args: OptimizeArguments):
     study = optuna.create_study(
+        study_name="reward_optimization",
+        storage=f"sqlite:///{os.path.join(LOG_DIR, 'optuna_study.db')}",
+        load_if_exists=True,
         direction="maximize",
+        sampler=TPESampler(multivariate=True),
         pruner=optuna.pruners.MedianPruner()
     )
 
@@ -202,12 +289,10 @@ def main(args: OptimizeArguments):
     print("Score:", study.best_value)
     print("Weights:", study.best_params)
 
-    rounded_weights = {
-        k: (round(v, 2) if isinstance(v, float) else v) for k, v in study.best_params 
-    }
 
-    with open(os.path.join(LOG_DIR, "weights.json")) as f:
-        json.dump(rounded_weights)
+    weights: Weights = Weights.from_flat_dict(study.best_params) 
+    with open(os.path.join(LOG_DIR, "reward_weights.json"), "w") as f:
+        json.dump(asdict(weights), f, indent=4)
 
 
     # Optimization history
