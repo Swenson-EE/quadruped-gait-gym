@@ -67,6 +67,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         observation = self.get_observation()
         info = {}
+        info["position"] = self.get_position()
 
         #print('Observation (reset):', observation)
         
@@ -81,7 +82,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         physics = self.sim.get(Physics)
         metrics = physics.get(LocomotionMetrics)
 
+        start_pos = self.get_position()
         self.sim.step(self.np_random, decoded_action)
+        end_pos = self.get_position()
         
         observation = self.get_observation()
 
@@ -89,6 +92,10 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         reward, penalty = sys_reward.get_reward()
 
         info = self.get_info()
+
+        info["start_position"] = start_pos
+        info["end_position"] = end_pos
+
         info['reward'] = reward
         info['penalty'] = penalty
         info['observation'] = observation
@@ -112,6 +119,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         #print_comp("joint_energy")
 
         #print_comp("forward_movement")
+        
 
         reward_total = 0
         if "reward" in self.weights:
@@ -138,7 +146,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         # print(info['components'])
 
         #total_reward = sum(reward.values()) - sum(penalty.values())
-
+    
 
         terminated = False
         truncated = False
@@ -183,5 +191,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def decode_action(self, action):
         return action
 
+
+    def get_position(self):
+        kn_world = self.sim.get(Physics).get(Kinematics).get(WorldKinematics)
+        return kn_world.get_position().copy()
 
     
