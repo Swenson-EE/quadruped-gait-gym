@@ -9,20 +9,20 @@ import numpy as np
 
 @register_module(Reward)
 class JointVarianceReward(RewardSubsystem):
-    _var_hist = 5
+    _var_hist = 20
     _joint_min = 15
     _joint_max = 45
 
     def initialize(self):
         self._normalization_factor["penalty"] = {
-            "small_joint_variance": self._joint_min,
+            # "small_joint_variance": self._joint_min,
             "large_joint_variance": self._joint_max
         }
 
         self._reducers["penalty"] = {
-            "small_joint_variance": lambda x: np.sum(
-                1 - x[(x < 1)]
-            ),
+            # "small_joint_variance": lambda x: np.sum(
+            #     1 - x[(x < 1)]
+            # ),
             "large_joint_variance": lambda x: np.sum(
                 x[x > 1]
             )
@@ -35,7 +35,7 @@ class JointVarianceReward(RewardSubsystem):
 
         reward = None
         penalty = {
-            "small_joint_variance": joint_variance,
+            #"small_joint_variance": joint_variance,
             "large_joint_variance": joint_variance
         }
 

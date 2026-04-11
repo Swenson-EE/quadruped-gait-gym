@@ -68,6 +68,6 @@ class FootKinematics(Subsystem):
                 vel = vel - np.dot(vel, n) * n
 
             slipping += np.linalg.norm(vel)
-
+        
         return slipping, num_paws_contacting
 

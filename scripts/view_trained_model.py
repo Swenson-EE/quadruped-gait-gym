@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 import time
 
 import mujoco.viewer
+import numpy as np
 
 from shared.utils.dataclass_parser import build_parser_from_dataclass
 from shared.algorithm.algorithm_info import get_algo_environment, get_algo_model
@@ -24,6 +25,8 @@ def key_callback(keycode):
 
 
 if __name__ == "__main__":
+    np.set_printoptions(linewidth=120)
+
     trained_model_parser = build_parser_from_dataclass(TrainedModel)
     args = trained_model_parser.parse_args()
 

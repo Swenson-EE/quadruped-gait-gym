@@ -6,7 +6,6 @@ from simulator.modules.physics_module import Physics
 from simulator.modules.physics.kinematics import Kinematics
 from simulator.modules.physics.kinematics_systems import JointKinematics
 
-
 import numpy as np
 
 
@@ -21,18 +20,21 @@ class JointRandomizer(Subsystem):
         self.noise = noise
 
     def initialize(self):
-        self.joint_qpos_ids = self.sim.robot_info.joint_qpos_ids
+        pass
+        #self.joint_qpos_ids = self.sim.robot_info.joint_qpos_ids
 
     def reset_start(self, rng):
         
         
         random_joint_angles_deg = rng.uniform(
             *self.noise,
-            size=len(self.joint_qpos_ids)
+            size=len(self.sim.robot_info.joint.qpos_addr)
         )
         
         kn_joint = self.sim.get(Physics).get(Kinematics).get(JointKinematics)
-        kn_joint.set_angles(self._initial_position + np.deg2rad(random_joint_angles_deg))
+        #kn_joint.set_angles(self._initial_position + np.deg2rad(random_joint_angles_deg))
+        
+        
         #kn_joint.set_angles(np.deg2rad(random_joint_angles_deg))
 
 

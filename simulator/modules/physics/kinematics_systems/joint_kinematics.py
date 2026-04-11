@@ -11,20 +11,20 @@ class JointKinematics(Subsystem):
 
     @property
     def _joint_qpos_ids(self):
+        print(self.sim.robot_info.joint_qpos_ids)
         return self.sim.robot_info.joint_qpos_ids
 
-    def get_angles(self, units = 'deg') -> np.ndarray:
+    def get_angles(self, units = 'deg', j_type=np.float32) -> np.ndarray:
         # Get joint angles (rad)
-        #joint_angles = self.data.qpos[self._joint_qpos_ids]
-        joint_angles = self.data.qpos[7:15]
+        joint_angles = self.data.qpos[self.sim.robot_info.joint.qpos_addr]
         
         if units == 'deg':
             joint_angles = np.rad2deg(joint_angles)
         
-        return joint_angles.astype(int)
+        return joint_angles.astype(j_type)
             
     def set_angles(self, angles: np.ndarray):
-        self.data.qpos[7:15] = angles
+        self.data.qpos[self.sim.robot_info.joint.qpos_addr] = angles
 
     def get_velocities(self):
-        return self.data.qvel[7:15]
+        return self.data.qvel[self.sim.robot_info.joint.qvel_addr]

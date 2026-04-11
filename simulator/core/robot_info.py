@@ -2,7 +2,7 @@ from simulator.core.subsystem.modular_subsystem import ModularSubsystem
 from simulator.core.registry import SubsystemRegistry
 
 import mujoco
-
+from types import SimpleNamespace
 
 class RobotInfo:
 
@@ -50,10 +50,17 @@ class RobotInfo:
 
         self.arm_geom_ids = [mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, name) for name in self.arm_names]
 
-        self.joint_ids = [mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name) for name in self.joint_names]
+        joint_ids = [mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name) for name in self.joint_names]
 
-        self.joint_qpos_ids = [self.model.jnt_qposadr[joint_id] for joint_id in self.joint_ids]
+        #self.joint_qpos_ids = [self.model.jnt_qposadr[joint_id] for joint_id in self.joint_ids]
         
+        self.joint = SimpleNamespace(
+            ids = joint_ids,
+            qpos_addr = [self.model.jnt_qposadr[joint_id] for joint_id in joint_ids],
+            qvel_addr = [self.model.jnt_dofadr[joint_id] for joint_id in joint_ids]
+        )
+        
+
 
         self.sensor_ids = {
             name: mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR, name) for name in [self.sensor_quat, self.sensor_gyro, self.sensor_accel] 

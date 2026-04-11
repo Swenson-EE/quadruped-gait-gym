@@ -21,10 +21,10 @@ class InitialPoseRandomizer(Subsystem):
 
     def reset_start(self, rng):
         rand_pos = self.random_position(rng)
-        self.data.qpos[0:2] += rand_pos # only randomize x and y, leave z alone
+        #self.data.qpos[0:2] += rand_pos # only randomize x and y, leave z alone
 
         rand_quat = self.random_rotation(rng)
-        self.data.qpos[3:7] += rand_quat
+        #self.data.qpos[3:7] += rand_quat
 
     def random_position(self, rng):
         return rng.uniform(*self.position_range, size=2)
