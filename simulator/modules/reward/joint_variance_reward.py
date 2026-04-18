@@ -23,7 +23,7 @@ class JointVarianceReward(RewardSubsystem):
             # "small_joint_variance": lambda x: np.sum(
             #     1 - x[(x < 1)]
             # ),
-            "large_joint_variance": lambda x: np.sum(
+            "large_joint_variance": lambda x: np.linalg.norm(
                 x[x > 1]
             )
         }

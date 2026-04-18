@@ -16,7 +16,6 @@ class JointRandomizer(Subsystem):
 
     def __init__(self, sim, noise):
         super().__init__(sim)
-        self.joint_qpos_ids = None
         self.noise = noise
 
     def initialize(self):
@@ -32,7 +31,7 @@ class JointRandomizer(Subsystem):
         )
         
         kn_joint = self.sim.get(Physics).get(Kinematics).get(JointKinematics)
-        #kn_joint.set_angles(self._initial_position + np.deg2rad(random_joint_angles_deg))
+        kn_joint.set_angles(self._initial_position + np.deg2rad(random_joint_angles_deg))
         
         
         #kn_joint.set_angles(np.deg2rad(random_joint_angles_deg))

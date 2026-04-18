@@ -17,8 +17,8 @@ class StabilityReward(RewardSubsystem):
 
         self._normalization_factor['penalty']['stability_rate'] = 0.1
 
-        self._reducers['penalty']['stability_angle'] = np.sum
-        self._reducers['penalty']['stability_rate'] = np.sum
+        self._reducers['penalty']['stability_angle'] = np.linalg.norm
+        self._reducers['penalty']['stability_rate'] = np.linalg.norm
 
 
     def _get_components(self):

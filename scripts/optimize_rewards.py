@@ -34,6 +34,8 @@ class OptimizeArguments:
     n_trials: int = 100
     n_jobs: int = 1
 
+    n_threads: int = 4
+
 optimize_arguments_parser = build_parser_from_dataclass(OptimizeArguments)
 
 
@@ -45,6 +47,7 @@ class Weights:
     @dataclass
     class Reward:
         efficiency: float
+        bent_joint: float
 
     @dataclass
     class Penalty:
@@ -270,6 +273,9 @@ def objective(trial):
         env,
         seed=42,
         **model_parameters,
+        policy_kwargs={
+            "net_arch": [64, 64]
+        },
         verbose=0
     )
 
@@ -410,6 +416,9 @@ def main(args: OptimizeArguments):
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
     
+    import torch
+    torch.set_num_threads(args.n_threads)
+
     print("#"*10, f"[TRAINING {args.algorithm.value.upper()}]", "#"*10)
     print(args.n_trials, "trials")
     print(args.n_jobs, "jobs")

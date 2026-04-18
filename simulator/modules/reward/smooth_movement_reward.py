@@ -16,8 +16,8 @@ class SmoothMovementReward(RewardSubsystem):
             'jitter_2nd': 0.1
         }
 
-        self._reducers['penalty']['jitter_1st'] = np.sum
-        self._reducers['penalty']['jitter_2nd'] = np.sum
+        self._reducers['penalty']['jitter_1st'] = np.linalg.norm
+        self._reducers['penalty']['jitter_2nd'] = np.linalg.norm
 
     def _get_components(self):
         joints = self.sim.get(SimulationState).joints

@@ -70,7 +70,7 @@ class PositionReward(RewardSubsystem):
 
     @property
     def dx(self):
-        return -self.position_change[0]     # To match the joint direction to be positive
+        return self.position_change[0] 
 
     @property
     def dy(self):

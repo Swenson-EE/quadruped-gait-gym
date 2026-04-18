@@ -107,11 +107,10 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
                 print(info['components'][name])
 
                 if name in penalty:
-                    print(penalty[name])
+                    print('penalty:', penalty[name])
                 elif name in reward:
-                    print(reward[name])
+                    print('reward:', reward[name])
                 print('\n'*2)
-            
 
         #print_comp("joint_velocity")
         #print_comp("joint_acceleration")
@@ -119,7 +118,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         #print_comp("joint_energy")
 
         #print_comp("forward_movement")
-        
+        #print_comp("bent_joint")
 
         reward_total = 0
         if "reward" in self.weights:
@@ -194,6 +193,6 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
     def get_position(self):
         kn_world = self.sim.get(Physics).get(Kinematics).get(WorldKinematics)
-        return kn_world.get_position().copy()
+        return kn_world.get_position()
 
     

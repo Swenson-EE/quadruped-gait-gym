@@ -12,7 +12,7 @@ class ActionReward(RewardSubsystem):
     """
     
     def initialize(self):
-        self._reducers["penalty"]["action_smooth"] = np.sum
+        self._reducers["penalty"]["action_smooth"] = np.linalg.norm
 
     def reset_end(self, rng):
         self.prev_action = None

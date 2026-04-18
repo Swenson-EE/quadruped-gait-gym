@@ -16,10 +16,10 @@ class JointReward(RewardSubsystem):
         self.curr_joint_vel = None
         self.next_joint_vel = None
 
-        self._reducers["penalty"]["joint_velocity"] = np.sum
-        self._reducers["penalty"]["joint_acceleration"] = np.sum
-        self._reducers["penalty"]["joint_jerk"] = np.sum
-        self._reducers["penalty"]["joint_energy"] = np.sum
+        self._reducers["penalty"]["joint_velocity"] = np.linalg.norm
+        self._reducers["penalty"]["joint_acceleration"] = np.linalg.norm
+        self._reducers["penalty"]["joint_jerk"] = np.linalg.norm
+        self._reducers["penalty"]["joint_energy"] = np.linalg.norm
 
         self._normalization_factor["penalty"]["joint_velocity"] = 100
         self._normalization_factor["penalty"]["joint_acceleration"] = 10

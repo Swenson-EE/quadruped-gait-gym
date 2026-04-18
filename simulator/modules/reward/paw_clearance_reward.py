@@ -6,6 +6,7 @@ from simulator.modules.physics_module import Physics
 from simulator.modules.physics.kinematics import Kinematics
 from simulator.modules.physics.kinematics_systems.foot_kinematics import FootKinematics
 
+import numpy as np
 
 
 @register_module(Reward)
@@ -16,7 +17,7 @@ class PawClearanceReward(RewardSubsystem):
     def initialize(self):
         self._normalization_factor['penalty']['paw_clearance'] = 0.05
 
-        self._reducers['penalty']['paw_clearance'] = lambda x: sum( [max(0, foot_z) for foot_z in x] )
+        self._reducers['penalty']['paw_clearance'] = lambda x: np.linalg.norm( [max(0, foot_z) for foot_z in x] )
 
 
     def _get_components(self):
