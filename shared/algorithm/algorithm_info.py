@@ -24,6 +24,10 @@ def get_algo_model(algo: Algorithm):
         case Algorithm.QLEARNING:
             from stable_baselines3 import DQN
             ModelClass = DQN
+
+        case Algorithm.A2C:
+            from stable_baselines3 import A2C
+            ModelClass = A2C
         
         case _:
             ModelClass = None
@@ -37,8 +41,10 @@ def get_algorithm_class(algorithm: Algorithm) -> Type[BaseBittleEnvironment] | N
         case Algorithm.SAC | Algorithm.DDPG | Algorithm.PPO_C:
            from environment.continuous_bittle_environment import ContinuousBittleEnvironment
            return ContinuousBittleEnvironment
-        case Algorithm.QLEARNING | Algorithm.PPO_D:
+        case Algorithm.QLEARNING | Algorithm.PPO_D | Algorithm.A2C:
             print(f'Discrete algorithm ({algorithm})')
+            from environment.discrete_bittle_environment import DiscreteBittleEnvironment
+            return DiscreteBittleEnvironment
         case _:
             print("Invalid algorithm:", algorithm)    
 

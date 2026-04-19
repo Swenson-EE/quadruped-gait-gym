@@ -26,7 +26,6 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
         )
 
         self.observation_space = gym.spaces.Dict({
-            # 'joint_history': gym.spaces.Box(-1, 1, shape=(self.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
             'joint_history': gym.spaces.Box(-1, 1, shape=(self.sim.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
             'gyro': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32),
             'accel': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32)
