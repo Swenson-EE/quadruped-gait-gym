@@ -18,8 +18,8 @@ from shared.utils.dataclass_parser import build_parser_from_dataclass, parse_arg
 
 
 
-LATERAL_WEIGHT = 0.5
-Z_WEIGHT = 0.2
+LATERAL_WEIGHT = 0.9
+Z_WEIGHT = 0.6
 
 LOG_DIR = "saved/optimization"
 EXCEL_PATH = "training_runs.xlsx"
@@ -313,11 +313,8 @@ def plot_trials():
     plt.xlabel("Episode")
     plt.ylabel("Reward")
     plt.title("Training Curves per Trial")
-    #plt.legend()
     
     plt.savefig(os.path.join(LOG_DIR,"training_curves.png"), dpi=300, bbox_inches="tight")
-
-    #plt.show()
 
 
 # MAIN LOOP
