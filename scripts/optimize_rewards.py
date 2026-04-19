@@ -260,7 +260,7 @@ def objective(trial):
     os.makedirs(monitor_dir, exist_ok=True)
 
     environment_class, model_class, model_parameters = make_env()
-
+    
 
     monitor_file = os.path.join(monitor_dir, f"monitor_{trial_id}")
     env = Monitor(

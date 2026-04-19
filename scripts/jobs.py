@@ -5,14 +5,14 @@ run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
 
 parallel_env=1
-steps=1e4
-seed = 10
+steps=10e6
+seed = 42
 discount_factor = 0.99
-learning_rate = 1e-3
-rec_freq = 1
+learning_rate = 3e-3
+rec_freq = 50
 num_checkpoints = 1
 
-network_architecture = [64]*4
+network_architecture = [64]*2
 
 
 training_jobs = {
@@ -34,4 +34,5 @@ training_jobs = {
 }
 
 
-jobs: list[TrainingJob] = training_jobs[Algorithm.DDPG] 
+#jobs: list[TrainingJob] = training_jobs[Algorithm.DDPG] 
+jobs: list[TrainingJob] = [item for sublist in training_jobs.values() for item in sublist]

@@ -24,12 +24,14 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
             weights = json.load(file)
             
 
-        from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model
+        from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model, get_algorithm_class
+        algo_env_class, algo_env_parameters = get_algorithm_class(training_job.algo)
+
         env = get_algo_vec_environment(
-            training_job.algo, 
+            algo_env_class, 
             training_job.parallel_env, 
-            parameters=EnvironmentParameters(
-                total_length=training_job.total_steps
+            parameters=algo_env_parameters(
+                total_length=training_job.total_steps / training_job.parallel_env
             ),
             weights=weights or {}
         )
@@ -74,7 +76,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
                 learning_rate=training_job.lr,
                 gamma=training_job.discount_factor,
                         
-                n_steps=int((training_job.batch_steps * 8) / training_job.parallel_env),
+                n_steps=int((training_job.batch_steps) / training_job.parallel_env),
 
                 seed=training_job.seed,
                 device=training_job.device,

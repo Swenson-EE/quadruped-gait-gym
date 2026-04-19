@@ -23,21 +23,15 @@ class DiscreteBittleEnvironment(BaseBittleEnvironment[DiscreteEnvironmentParamet
             self.params.joint_bin_size
         )
 
-        self.action_space = gym.spaces.Discrete([len(self.joint_bins)] ** self.sim.NUM_JOINTS)
+        
+        self.action_space = gym.spaces.MultiDiscrete([len(self.joint_bins)] * self.sim.NUM_JOINTS)
 
-        #self.action_space = gym.spaces.MultiDiscrete([len(self.joint_bins)] * 8)
-        # self.observation_space = gym.spaces.Dict({
-        #     'gyro': gym.spaces.MultiDiscrete([len(self.imu_bins)] * 3),
-        #     'accel': gym.spaces.MultiDiscrete([len(self.imu_bins)] * 3),
-        #     'joint_history': gym.spaces.MultiDiscrete(
-        #         [len(self.joint_bins)] * (self.sim.NUM_JOINTS * self.sim.params.length_joint_history)
-        #     )
-        # })
         self.observation_space = gym.spaces.Dict({
             'joint_history': gym.spaces.Box(-1, 1, shape=(self.sim.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
             'gyro': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32),
             'accel': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32)
         })
+
 
     def discretize_vector(self, values, bins):
         values = np.array(values)
@@ -54,22 +48,9 @@ class DiscreteBittleEnvironment(BaseBittleEnvironment[DiscreteEnvironmentParamet
         return bins[indices]
 
 
-    def encode_action(self, joint_indices, num_bins):
-        action = 0
-        for i, idx in enumerate(joint_indices):
-            action += idx * (num_bins ** i)
-        return action
-    
-    def _decode_action(self, action):
-        num_bins = len(self.joint_bins)
-        indices = []
-        for _ in range(self.sim.NUM_JOINTS):
-            indices.append(action % num_bins)
-            action //= num_bins
-        return np.array(indices)
 
     def decode_action(self, action):
-        joint_angles_deg = self._decode_action(action)
+        joint_angles_deg = self.joint_bins[action]
         decoded = np.deg2rad(joint_angles_deg)
         
         return decoded
