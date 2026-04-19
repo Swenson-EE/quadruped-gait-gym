@@ -130,11 +130,11 @@ def append_to_excel(df, path=os.path.join(LOG_DIR, EXCEL_PATH)):
 
 # ENVIRONMENT FACTORY
 def make_env():
-    environment_class = get_algorithm_class(algorithm)
+    environment_class, environment_parameters = get_algorithm_class(algorithm)
 
     model_class, model_parameters = get_algo_model(algorithm)
 
-    return environment_class, model_class, model_parameters
+    return environment_class, environment_parameters, model_class, model_parameters
 
 
 def normalize(d):
@@ -259,12 +259,12 @@ def objective(trial):
     monitor_dir = os.path.join(LOG_DIR, "monitors")
     os.makedirs(monitor_dir, exist_ok=True)
 
-    environment_class, model_class, model_parameters = make_env()
+    environment_class, environment_parameters, model_class, model_parameters = make_env()
     
 
     monitor_file = os.path.join(monitor_dir, f"monitor_{trial_id}")
     env = Monitor(
-        environment_class(weights = weights),
+        environment_class(parameters=environment_parameters(), weights = weights),
         filename=monitor_file
     )
 
