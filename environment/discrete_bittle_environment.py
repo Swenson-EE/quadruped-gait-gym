@@ -15,14 +15,7 @@ class DiscreteBittleEnvironment(BaseBittleEnvironment[DiscreteEnvironmentParamet
 
     def __init__(self, parameters: DiscreteEnvironmentParameters = DiscreteEnvironmentParameters(), weights = {}):
         super().__init__(parameters=parameters, weights=weights)
-
-        # self.joint_bins = np.arange(
-        #     -self.sim.params.joint_max, 
-        #     self.sim.params.joint_max + self.params.joint_bin_size, 
-        #     self.params.joint_bin_size
-        # )
-
-        # print("joint bins",self.joint_bins)
+        
         self.joint_bins = np.linspace(-1, 1, self.params.num_joint_bins)
 
         
@@ -31,10 +24,7 @@ class DiscreteBittleEnvironment(BaseBittleEnvironment[DiscreteEnvironmentParamet
 
 
     def decode_action(self, action):
-        # joint_angles_deg = self.joint_bins[action]
-        # decoded = np.deg2rad(joint_angles_deg)
         joint_targets = self.joint_bins[action]
-        joint_targets = action * self.params.joint_delta
         
         return joint_targets
 

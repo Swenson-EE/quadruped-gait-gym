@@ -108,7 +108,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         action = self.decode_action(action)
 
         action = np.clip(
-            action,
+            action * self.params.joint_delta,
             self.params.joint_min,
             self.params.joint_max
         )

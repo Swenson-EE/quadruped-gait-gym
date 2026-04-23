@@ -8,7 +8,7 @@ from environment.base_bittle_environment import BaseBittleEnvironment, Environme
 
 @dataclass
 class ContinuousEnvironmentParameters(EnvironmentParameters):
-    joint_max_delta: int = np.deg2rad(30)
+    joint_max_delta: int = np.deg2rad(25)
 
 
 class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentParameters]):
@@ -26,7 +26,7 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
 
 
     def decode_action(self, action):
-        joint_targets = action * self.params.joint_delta
+        #joint_targets = action * self.params.joint_delta
        # decoded = np.deg2rad(action * self.sim.params.joint_max)
 
-        return joint_targets
+        return action
