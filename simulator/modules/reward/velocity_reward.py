@@ -34,12 +34,15 @@ class VelocityReward(RewardSubsystem):
         kinematics = physics.get(Kinematics)
         kn_world = kinematics.get(WorldKinematics)
 
-        velocity = self.initial_rotation.T @ kn_world.get_velocity()
-        
-        reward = None
+        #velocity = self.initial_rotation.T @ kn_world.get_velocity()
+        velocity = kn_world.get_velocity()
+
+        reward = {
+            "forward_velocity": velocity[0],
+        }
         penalty = {
-            "lateral_velocity": abs(velocity[1]),
-            "z_velocity": abs(velocity[2])
+            #"lateral_velocity": abs(velocity[1]),
+            #"z_velocity": abs(velocity[2])
         }
 
         return reward, penalty

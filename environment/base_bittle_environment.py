@@ -23,8 +23,12 @@ from simulator.modules.physics.kinematics_systems import BasisKinematics, FootKi
 class EnvironmentParameters:
     #length_joint_history: int = 20
 
-    #joint_min: int = -120
-    #joint_max: int = 120
+    joint_min: int = -120
+    joint_max: int = 120
+    
+    joint_delta: int = 30
+    
+    phase_rate: float = 1.0
 
     episode_length: int = 250
     total_length: int = 1e6
@@ -35,7 +39,7 @@ T = TypeVar("T", bound=EnvironmentParameters)
 
 
 class BaseBittleEnvironment(gym.Env, Generic[T]):
-
+    
     def __init__(self, parameters: T = EnvironmentParameters(), weights = {}):
         super().__init__()
 
@@ -51,10 +55,32 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         )
 
         self.sim = BittleSimulator(parameters=bittle_params)
-        self.OBSERVATION_DIM = (self.sim.params.length_joint_history * self.sim.NUM_JOINTS) + self.sim.NUM_IMU_OBS
+
+
+        self.JOINT_HISTORY_DIM = (self.sim.params.length_joint_history, self.sim.NUM_JOINTS)
+        self.GYRO_DIM = 3
+        self.ACCEL_DIM = 3
+        #self.IMU_DIM = self.sim.NUM_IMU_OBS
+        self.PAW_CONTACT_DIM = 4
+        #self.OBSERVATION_DIM = JOINT_HISTORY_DIM + IMU_DIM + PAW_CONTACT_DIM
 
         self.step_count = 0
         self.total_session_step_count = 0
+
+
+        self.phase = 0
+        self.phase_rate = 2 * np.pi * self.params.phase_rate
+
+
+
+        self.observation_space = gym.spaces.Dict({
+            'joint_history': gym.spaces.Box(-1, 1, shape=self.JOINT_HISTORY_DIM, dtype=np.float32),
+            'gyro': gym.spaces.Box(-1, 1, shape=(self.GYRO_DIM,), dtype=np.float32),
+            'accel': gym.spaces.Box(-1, 1, shape=(self.ACCEL_DIM,), dtype=np.float32),
+            'paw_contact': gym.spaces.Box(0, 1, shape=(self.PAW_CONTACT_DIM,), dtype=np.float32),
+            'phase': gym.spaces.Box(-1, 1, shape=(2,), dtype=np.float32)
+        })
+
     
 
 
@@ -62,6 +88,8 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         super().reset(seed=seed)
 
         self.step_count = 0
+
+        self.phase = 0
 
         self.sim.reset(self.np_random)        
 
@@ -77,14 +105,24 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         
 
     def step(self, action):
-        decoded_action = self.decode_action(action)
+        action = self.decode_action(action)
+
+        action = np.clip(
+            action,
+            self.params.joint_min,
+            self.params.joint_max
+        )
+        action = np.deg2rad(action)
 
         physics = self.sim.get(Physics)
-        metrics = physics.get(LocomotionMetrics)
+        metrics: LocomotionMetrics = physics.get(LocomotionMetrics)
 
         start_pos = self.get_position()
-        self.sim.step(self.np_random, decoded_action)
+        self.sim.step(self.np_random, action)
         end_pos = self.get_position()
+
+        self.phase += self.phase_rate * self.sim.params.control_dt
+
         
         observation = self.get_observation()
 
@@ -171,16 +209,26 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
     def get_observation(self):      
         physics = self.sim.get(Physics)
         sensors = physics.get(Sensors)
+        contacts: Contacts = physics.get(Contacts)
 
         imu_gyro = sensors.imu_gyro
         imu_accel = sensors.imu_accel
 
         joint_history = self.sim.get(SimulationState).joints
+        paw_contact = contacts.contacting_geoms(self.sim.robot_info.foot_geom_ids)
+
+
+        phase = np.array([
+            np.sin(self.phase),
+            np.cos(self.phase)
+        ])
 
         return {
             "joint_history": joint_history.internal.get(),
             "gyro": np.clip(imu_gyro.internal.get(), -1.0, 1.0),
-            "accel": np.clip(imu_accel.internal.get(), -1.0, 1.0)
+            "accel": np.clip(imu_accel.internal.get(), -1.0, 1.0),
+            "paw_contact": paw_contact,
+            "phase": phase
         }
 
     

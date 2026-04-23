@@ -8,7 +8,7 @@ from simulator.modules.reward_module import Reward
 import numpy as np
 
 
-@register_module(Reward)
+#@register_module(Reward)
 class BentJointReward(RewardSubsystem):
     _TARGET_ANGLE = 0.3 # radians
     _SIGMA = 0.1 # Tolerance band

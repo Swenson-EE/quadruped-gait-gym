@@ -9,7 +9,7 @@ from simulator.modules.physics.kinematics_systems.foot_kinematics import FootKin
 import numpy as np
 
 
-@register_module(Reward)
+#@register_module(Reward)
 class PawClearanceReward(RewardSubsystem):
 
     PAW_Z_THRESHOLD = 0.005

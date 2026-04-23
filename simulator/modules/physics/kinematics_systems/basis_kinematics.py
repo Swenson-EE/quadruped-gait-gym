@@ -2,6 +2,8 @@ from simulator.core.subsystem.subsystem import Subsystem
 from simulator.core.registry import register_module
 from simulator.modules.physics.kinematics import Kinematics
 
+from scipy.spatial.transform import Rotation as R
+
 from dataclasses import field
 import numpy as np
 import mujoco
@@ -35,15 +37,28 @@ class BasisKinematics(Subsystem):
 
     def get_tilt(self):
         """Returns (roll, pitch) in radians from the base quaternion."""
-        # Quaternion components
-        qw, qx, qy, qz = self.get_quat()
+        # # Quaternion components
+        # qw, qx, qy, qz = self.get_quat()
 
-        # Roll (x-axis)
-        roll = np.arctan2(2*(qw*qx + qy*qz), 1 - 2*(qx**2 + qy**2))
-
-        # Pitch (y-axis)
-        pitch = np.arctan2(2*(qw*qy - qz*qx), np.sqrt(1 - (2*(qw*qy - qz*qx))**2))
         
+
+        # # Roll (x-axis)
+        # roll = np.arctan2(2*(qw*qx + qy*qz), 1 - 2*(qx**2 + qy**2))
+
+        # # Pitch (y-axis)
+        # pitch = np.arctan2(2*(qw*qy - qz*qx), np.sqrt(1 - (2*(qw*qy - qz*qx))**2))
+        
+        quat = self.get_quat() # [w, x, y, z]
+        quat = np.array([
+            quat[1],
+            quat[2],
+            quat[3],
+            quat[0]
+        ]) # [x, y, z, w]
+
+        r = R.from_quat(quat)
+        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+
         return roll, pitch
 
 

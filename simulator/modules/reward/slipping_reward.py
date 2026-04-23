@@ -7,7 +7,7 @@ from simulator.modules.physics.kinematics import Kinematics
 from simulator.modules.physics.kinematics_systems.foot_kinematics import FootKinematics
 
 
-@register_module(Reward)
+#@register_module(Reward)
 class SlippingReward(RewardSubsystem):
 
     def initialize(self):
@@ -20,12 +20,12 @@ class SlippingReward(RewardSubsystem):
         kinematics = physics.get(Kinematics)
         kn_foot = kinematics.get(FootKinematics)
 
-        paw_slipping, num_paws_contacting = kn_foot.paw_slipping()
+        paw_slipping, paw_contacts = kn_foot.paw_slipping()
 
         reward = None
         penalty = {
             "slipping": paw_slipping,
-            "paws_contacting": float(num_paws_contacting < 2)
+            "paws_contacting": float(len(paw_contacts) < 2)
         }
 
         return reward, penalty

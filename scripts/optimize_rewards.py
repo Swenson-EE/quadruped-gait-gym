@@ -39,36 +39,45 @@ class OptimizeArguments:
 optimize_arguments_parser = build_parser_from_dataclass(OptimizeArguments)
 
 
-LOW = 0.1
-HIGH = 5.0
+LOW = 0.001
+HIGH = 1.0
 
 @dataclass
 class Weights:
     @dataclass
     class Reward:
         efficiency: float
-        bent_joint: float
+        air_time: float
+        forward_velocity: float
+        # bent_joint: float
 
     @dataclass
     class Penalty:
-        lateral_movement: float
-        z_movement: float
-        crawling: float
-        large_joint_variance: float
-        paw_clearance: float
-        slipping: float
-        paws_contacting: float
-        jitter_1st: float
-        jitter_2nd: float
+        action_smooth: float
+        height: float
+        symmetry: float
+
         stability_angle: float
         stability_rate: float
-        lateral_velocity: float
-        z_velocity: float
-        action_smooth: float
-        joint_velocity: float
-        joint_acceleration: float
-        joint_jerk: float
-        joint_energy: float
+
+        
+        # lateral_velocity: float
+        # z_velocity: float
+
+        # lateral_movement: float
+
+        # crawling: float
+        # large_joint_variance: float
+        # paw_clearance: float
+        # slipping: float
+        # paws_contacting: float
+        # jitter_1st: float
+        # jitter_2nd: float
+        
+        # joint_velocity: float
+        # joint_acceleration: float
+        # joint_jerk: float
+        # joint_energy: float
 
     reward: Reward
     penalty: Penalty
@@ -179,19 +188,18 @@ def sample_weights(trial):
     weights["reward"] = normalize(weights["reward"])
     weights["penalty"] = normalize(weights["penalty"])
 
+    with open("config/reward_weights.json") as file:
+        data = json.load(file)
+
     return weights
 
 # EVALUATION FUNCTION
 def evaluate(model, env, n_episodes = 5):
-    # total_reward = 0.0
-    # success_count = 0
-
     metrics = []
 
     for _ in range(n_episodes):
         obs, info = env.reset()
         done = False
-        #ep_reward = 0.0
 
         forward = lateral = z = 0.0
         steps = 0
@@ -200,10 +208,6 @@ def evaluate(model, env, n_episodes = 5):
         while not done:
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, terminated, truncated, info = env.step(action)
-
-            #ep_reward += reward
-            #curr_pos = env.get_position()
-            #curr_pos = info["position"]
 
             start_pos = info["start_position"]
             end_pos = info["end_position"]
@@ -214,36 +218,19 @@ def evaluate(model, env, n_episodes = 5):
             lateral += abs(dy)
             z += abs(dz)
 
-            
             steps += 1
 
             done = terminated or truncated
 
-        #total_reward += ep_reward
         metrics.append((
             forward / steps,
             lateral / steps,
             z / steps
         ))
 
-    # # TODO: Success metric
-    # if info.get("is_success", False):
-    #     success_count += 1
-
-    # # Prefer success rate if available
-    # if success_count > 0:
-    #     return success_count / n_episodes
-
-    # return total_reward / n_episodes
-
     mean_forward = np.mean([m[0] for m in metrics])
     mean_lateral = np.mean([m[1] for m in metrics])
     mean_z = np.mean([m[2] for m in metrics])
-
-
-    # efficiency = info['components']['efficiency']
-    # lateral_movement = info['components']['lateral_movement']
-    # z_movement = info['components']['z_movement']
 
     return mean_forward, mean_lateral, mean_z
 
@@ -344,19 +331,84 @@ def main(args: OptimizeArguments):
     print("Score:", best_trial.values)
     print("Weights:", best_trial.params)
 
+
     weights: Weights = Weights.from_flat_dict(best_trial.params) 
     with open(os.path.join(LOG_DIR, "reward_weights.json"), "w") as f:
         json.dump(asdict(weights), f, indent=4)
 
     print("\n\nvalues:", best_trial.values)
 
+
+    # ===================================
+    #           Overall plots
+    # ===================================
+    os.makedirs(os.path.join(LOG_DIR, "overall"), exist_ok=True)
+
+
+    target_name = "Overall Score"
+    fig = vis.plot_pareto_front(
+        study,
+        #target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
+        target_names=["forward", "lateral", "z"]
+    )
+    fig.write_image(os.path.join(LOG_DIR, "overall", f"optimization_history_overall.png"))
+
+    fig = vis.plot_param_importances(
+        study,
+        target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
+        target_name=target_name
+    )
+    fig.update_layout(title="Overall Hyperparameter Importance")
+    fig.write_image(os.path.join(LOG_DIR, "overall", f"param_importances_overall.png"))
+
+    # Parallel coordinate
+    fig = vis.plot_optimization_history(
+        study,
+        target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
+        target_name=target_name
+    )
+    #fig.update_layout(title="Overall Optimization History")
+    fig.write_image(os.path.join(LOG_DIR, "overall", f"optimization_history_overall.png"))
+
+
+
+    pairs = [
+        (0, 1, "forward_vs_lateral"),
+        (0, 2, "forward_vs_z"),
+        (1, 2, "lateral_vs_z")
+    ]
+
+    for i, j, name in pairs:
+        fig = vis.plot_pareto_front(
+            study,
+            target_names=["Forward, Lateral", "Z"],
+            targets=lambda t: (t.values[i], t.values[j])
+        )
+        fig.update_layout(title=name.replace("_", " ").title())
+        fig.write_image(os.path.join(LOG_DIR, f"pareto_{name}.png"))
+
+
+
+    # ===================================
+    #           Individual plots
+    # ===================================
+    
+    def get_top_trials(study, index, top_n: 50):
+        trials = [t for t in study.trials if t.values is not None]
+        trials = sorted(trials, key=lambda t: t.values[index], reverse=True)
+        return trials[:top_n]
+    
     trial_values = {
         0: "forward",
         1: "lateral",
         2: "z"
     }
 
+
     for index, name in trial_values.items():
+        trial_dir = os.path.join(LOG_DIR, name)
+        os.makedirs(trial_dir, exist_ok=True)
+
         target_name = f"{name.capitalize()} Distance"
 
         fig = vis.plot_param_importances(
@@ -364,46 +416,64 @@ def main(args: OptimizeArguments):
             target=lambda t: t.values[index],
             target_name=target_name
         )
-        fig.write_image(os.path.join(LOG_DIR, f"optimization_history_{name}.png"))
+        fig.update_layout(title=f"{name.capitalize()} Hyperparameter Importances")
+        fig.write_image(os.path.join(trial_dir, f"param_importance_{name}.png"))
 
-        fig = vis.plot_param_importances(
+
+        fig = vis.plot_slice(
             study,
             target=lambda t: t.values[index],
             target_name=target_name
         )
-        fig.write_image(os.path.join(LOG_DIR, f"param_importances_{name}.png"))
+        fig.update_layout(title=f"{name.capitalize()} Slice Plot")
+        fig.write_image(os.path.join(trial_dir, f"slice_{name}.png"))
 
-        # Parallel coordinate
+
+        fig = vis.plot_contour(
+            study,
+            target=lambda t: t.values[index],
+            target_name=target_name
+        )
+        fig.update_layout(title=f"{name.capitalize()} Contour Plot")
+        fig.write_image(os.path.join(trial_dir, f"contour_{name}.png"))
+
+
+
         fig = vis.plot_parallel_coordinate(
             study,
+            params=None,
             target=lambda t: t.values[index],
             target_name=target_name
         )
-        fig.write_image(os.path.join(LOG_DIR, f"parallel_coordinates_{name}.png"))
+        fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
+        fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
 
+        # fig = vis.plot_param_importances(
+        #     study,
+        #     target=lambda t: t.values[index],
+        #     target_name=target_name
+        # )
+        # fig.update_layout(title=f"{name.capitalize} Hyperparameter Importances")
+        # fig.write_image(os.path.join(trial_dir, f"optimization_history_{name}.png"))
 
-    target_name = "Combined Score"
-    fig = vis.plot_param_importances(
-        study,
-        target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
-        target_name=target_name
-    )
-    fig.write_image(os.path.join(LOG_DIR, f"optimization_history_combined.png"))
+        # fig = vis.plot_optimization_history(
+        #     study,
+        #     target=lambda t: t.values[index],
+        #     target_name=target_name
+        # )
+        # fig.update_layout(title=f"")
+        # fig.write_image(os.path.join(trial_dir, f"param_importances_{name}.png"))
 
-    fig = vis.plot_param_importances(
-        study,
-        target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
-        target_name=target_name
-    )
-    fig.write_image(os.path.join(LOG_DIR, f"param_importances_combined.png"))
+        # # Parallel coordinate
+        # fig = vis.plot_parallel_coordinate(
+        #     study,
+        #     target=lambda t: t.values[index],
+        #     target_name=target_name
+        # )
+        # fig.write_image(os.path.join(trial_dir, f"parallel_coordinates_{name}.png"))
 
-    # Parallel coordinate
-    fig = vis.plot_parallel_coordinate(
-        study,
-        target=lambda t: t.values[0] - LATERAL_WEIGHT*t.values[1] - Z_WEIGHT*t.values[2],
-        target_name=target_name
-    )
-    fig.write_image(os.path.join(LOG_DIR, f"parallel_coordinates_combined.png"))
+    
+    
     
 
     plot_trials()

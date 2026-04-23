@@ -12,7 +12,7 @@ import numpy as np
 @register_module(Randomization, noise=(-15, 15))
 class JointRandomizer(Subsystem):
     #_initial_position = [1, 0, 1, 0, 1, 0, 1, 0]
-    _initial_position = [0.5, 0] * 4
+    _initial_position = [0.3, 0.3] * 4
 
     def __init__(self, sim, noise):
         super().__init__(sim)
@@ -32,7 +32,7 @@ class JointRandomizer(Subsystem):
         
         kn_joint = self.sim.get(Physics).get(Kinematics).get(JointKinematics)
         kn_joint.set_angles(self._initial_position + np.deg2rad(random_joint_angles_deg))
-        
+        #kn_joint.set_angles(self._initial_position)
         
         #kn_joint.set_angles(np.deg2rad(random_joint_angles_deg))
 

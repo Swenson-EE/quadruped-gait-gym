@@ -4,7 +4,7 @@ from runner.training_job import TrainingJob
 run = 'sequential'
 parallel_run = 2 # For use in run='parallel'
 
-parallel_env=1
+parallel_env=8
 steps=10e6
 seed = 42
 discount_factor = 0.99

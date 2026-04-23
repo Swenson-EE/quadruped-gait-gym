@@ -6,7 +6,7 @@ from simulator.modules.reward_module import Reward
 from simulator.modules.physics_module import Physics
 
 
-@register_module(Reward)
+#@register_module(Reward)
 class CrawlReward(RewardSubsystem):
     
     def initialize(self):

@@ -19,20 +19,14 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
         super().__init__(parameters=parameters, weights=weights)
 
         self.action_space = gym.spaces.Box(
-            # np.array([self.params.joint_min] * self.sim.NUM_JOINTS),
-            # np.array([self.params.joint_max] * self.sim.NUM_JOINTS)
             np.array([-1] * self.sim.NUM_JOINTS),
             np.array([1] * self.sim.NUM_JOINTS)
         )
 
-        self.observation_space = gym.spaces.Dict({
-            'joint_history': gym.spaces.Box(-1, 1, shape=(self.sim.params.length_joint_history, self.sim.NUM_JOINTS), dtype=np.float32),
-            'gyro': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32),
-            'accel': gym.spaces.Box(-1, 1, shape=(3,), dtype=np.float32)
-        })
 
 
     def decode_action(self, action):
-        decoded = np.deg2rad(action * self.sim.params.joint_max)
+        joint_targets = action * self.params.joint_delta
+       # decoded = np.deg2rad(action * self.sim.params.joint_max)
 
-        return decoded
+        return joint_targets

@@ -47,11 +47,11 @@ def get_algorithm_class(algorithm: Algorithm) -> tuple[Type[BaseBittleEnvironmen
     return None
 
 
-def get_algo_environment(algo: Algorithm, parameters: EnvironmentParameters = EnvironmentParameters(), weights = {}):
+def get_algo_environment(algo: Algorithm, parameters = {}, weights = {}):
     algorithm_class, algo_env_parameters = get_algorithm_class(algo)
 
     if algorithm_class is not None:
-        return algorithm_class(parameters=(algo_env_parameters() | parameters), weights=weights)
+        return algorithm_class(parameters=algo_env_parameters(**parameters), weights=weights)
             
     return None
 

@@ -46,19 +46,23 @@ class FootKinematics(Subsystem):
 
     def paw_slipping(self):
         slipping = 0.0
-        num_paws_contacting = 0
+        #num_paws_contacting = 0
+        paws_contacting = np.zeros(4)
         paw_geom_ids = self.sim.robot_info.foot_geom_ids
+
 
         physics = self.sim.get(Physics)
 
-        contacts = physics.get(Contacts)
+        contacts: Contacts = physics.get(Contacts)
         kinematics = physics.get(Kinematics)
         
-        kn_body = kinematics.get(BodyKinematics)
+        kn_body: BodyKinematics = kinematics.get(BodyKinematics)
 
+        paw_contacts = contacts.contacting_geoms(paw_geom_ids)
 
-        for geom_id in contacts.contacting_geoms(paw_geom_ids):
-            num_paws_contacting += 1
+        #for geom_id in contacts.contacting_geoms(paw_geom_ids):
+        for i in range(len(paw_contacts)):
+            geom_id = paw_geom_ids[i]
             body_id = self.model.geom_bodyid[geom_id]
             vel = kn_body.get_velocity(body_id)
 
@@ -69,5 +73,5 @@ class FootKinematics(Subsystem):
 
             slipping += np.linalg.norm(vel)
         
-        return slipping, num_paws_contacting
+        return slipping, paws_contacting
 

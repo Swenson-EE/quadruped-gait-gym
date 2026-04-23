@@ -26,7 +26,7 @@ class StabilityReward(RewardSubsystem):
         physics = self.sim.get(Physics)
 
         kinematics = physics.get(Kinematics)
-        kn_basis = kinematics.get(BasisKinematics)
+        kn_basis: BasisKinematics = kinematics.get(BasisKinematics)
 
         roll, pitch = kn_basis.get_tilt()
         

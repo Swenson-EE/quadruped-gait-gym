@@ -7,7 +7,7 @@ from simulator.modules.simulation_state import SimulationState
 import numpy as np
 
 
-@register_module(Reward)
+#@register_module(Reward)
 class SmoothMovementReward(RewardSubsystem):
 
     def initialize(self):

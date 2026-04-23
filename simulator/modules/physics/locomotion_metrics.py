@@ -24,7 +24,7 @@ class LocomotionMetrics(Subsystem):
     
     def is_fallen(self, fall_threshold = 1.3):
         kinematics = self.sim.get(Physics).get(Kinematics)
-        kn_basis = kinematics.get(BasisKinematics)
+        kn_basis: BasisKinematics = kinematics.get(BasisKinematics)
 
         roll, pitch = kn_basis.get_tilt()
         is_fallen = (np.fabs(roll) > fall_threshold) or (np.fabs(pitch) > fall_threshold)
