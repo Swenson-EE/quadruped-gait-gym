@@ -4,6 +4,7 @@ import json
 from shared.algorithm.algorithm_types import Algorithm
 
 from shared.algorithm.algorithm_info import get_algorithm_class, get_algo_model
+from shared.config.environment_parameters import EnvironmentParameters
 from shared.config.hyperparameters import Hyperparameters
 from shared.rewards import RewardWeights
 from shared.utils.dataclass_parser import build_parser_from_dataclass, parse_args_to_dataclass
@@ -69,9 +70,9 @@ class Optimizer:
 
     # ENVIRONMENT FACTORY
     def make_env(self):
-        environment_class, environment_parameters = get_algorithm_class(self.args.algorithm)
-        model_class, model_parameters = get_algo_model(self.args.algorithm)
-        return environment_class, environment_parameters, model_class, model_parameters
+        environment_class = get_algorithm_class(self.args.algorithm)
+        model_class = get_algo_model(self.args.algorithm)
+        return environment_class, model_class
     
     # EVALUATION FUNCTION
     def evaluate(self, model, env, n_episodes = 5):
@@ -120,24 +121,17 @@ class Optimizer:
         monitor_dir = os.path.join(self.SAVE_DIR, "monitors")
         os.makedirs(monitor_dir, exist_ok=True)
 
-        environment_class, environment_parameters_cls, model_class, model_parameters = self.make_env()
+        environment_class, model_class = self.make_env()
 
         weights = self.get_weights(trial)
         env_params = self.get_environment_parameters(trial)
         hyperparameters = self.get_model_parameters(trial)
-        #model_parameters = model_parameters | self.get_model_parameters(trial)
-
-        #print(f'test\n{environment_parameters_cls(**env_params)}\n\n')
 
         monitor_file = os.path.join(monitor_dir, f"monitor_{trial_id}")
         env = Monitor(
-            environment_class(parameters=environment_parameters_cls(**env_params), weights = weights),
+            environment_class(parameters=env_params, weights = weights),
             filename=monitor_file
         )
-        
-        #print(f"weights\n{weights}\n")
-        #print(f"env_params\n{env_params}\n")
-        #print(f"model_params\n{model_parameters}\n")
 
 
         activation_fn = torch.nn.Tanh
@@ -305,8 +299,8 @@ class Optimizer:
 
         return weights
     
-    def get_environment_parameters(self, trial: optuna.Trial):
-        return {}
+    def get_environment_parameters(self, trial: optuna.Trial) -> EnvironmentParameters:
+        return EnvironmentParameters()
 
     def get_model_parameters(self, trial: optuna.Trial) -> Hyperparameters:
         return Hyperparameters()
@@ -321,6 +315,7 @@ class Optimizer:
         pass
 
     def plot_study(self, study: optuna.Study):
+        print("#"*5, " [PLOTTING STUDY] ", "#"*5)
         try:
             # ===================================
             #           Overall plots

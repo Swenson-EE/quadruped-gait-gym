@@ -4,20 +4,19 @@ import gymnasium as gym
 import numpy as np
 
 from environment.base_bittle_environment import BaseBittleEnvironment, EnvironmentParameters
+from shared.rewards.rewards import RewardWeights
 
 
-@dataclass 
-class DiscreteEnvironmentParameters(EnvironmentParameters):
-    joint_bin_size = 15
-    num_joint_bins = 7
 
-class DiscreteBittleEnvironment(BaseBittleEnvironment[DiscreteEnvironmentParameters]):
 
-    def __init__(self, parameters: DiscreteEnvironmentParameters = DiscreteEnvironmentParameters(), weights = {}):
+class DiscreteBittleEnvironment(BaseBittleEnvironment):
+
+    def __init__(self, parameters: EnvironmentParameters = EnvironmentParameters(), weights = RewardWeights()):
         super().__init__(parameters=parameters, weights=weights)
         
-        self.joint_bins = np.linspace(-1, 1, self.params.num_joint_bins)
+        self.num_joint_bins = 7
 
+        self.joint_bins = np.linspace(-1, 1, self.num_joint_bins)
         
         self.action_space = gym.spaces.MultiDiscrete([len(self.joint_bins)] * self.sim.NUM_JOINTS)
 

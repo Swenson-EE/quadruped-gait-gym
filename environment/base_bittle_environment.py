@@ -5,6 +5,7 @@ import gymnasium as gym
 import numpy as np
 
 #from parameters import rewards
+from shared.config.environment_parameters import EnvironmentParameters
 from shared.rewards.components import RewardComponents, RewardNormalizationFactors, normalize_reward_components
 from shared.rewards import RewardWeights
 from shared.rewards.rewards import compute_total
@@ -20,36 +21,34 @@ from simulator.modules.physics import Kinematics, Contacts, Sensors, LocomotionM
 from simulator.modules.physics.kinematics_systems import BasisKinematics, FootKinematics, JointKinematics, WorldKinematics
 
 
-@dataclass
-class EnvironmentParameters:
-    #length_joint_history: int = 20
-
-    joint_min: int = -120
-    joint_max: int = 120
+# @dataclass
+# class EnvironmentParameters:
+#     joint_min: int = -120
+#     joint_max: int = 120
     
-    joint_delta: int = 25
+#     joint_delta: int = 25
     
-    phase_rate: float = 1.0
+#     phase_rate: float = 1.0
 
-    episode_length: int = 250
-    total_length: int = 1e6
+#     length_joint_history: int = 50
+
+#     episode_length: int = 250
+#     total_length: int = 1e6
+
+# T = TypeVar("T", bound=EnvironmentParameters)
 
 
-
-T = TypeVar("T", bound=EnvironmentParameters)
-
-
-class BaseBittleEnvironment(gym.Env, Generic[T]):
+class BaseBittleEnvironment(gym.Env):
     
-    def __init__(self, parameters: T = EnvironmentParameters(), weights = RewardWeights()):
+    def __init__(self, parameters: EnvironmentParameters = EnvironmentParameters(), weights = RewardWeights()):
         super().__init__()
 
         self.params = parameters
         self.weights = weights
 
-
         bittle_params = BittleParameters(
-            model_path="model/bittle_mujoco.xml"
+            model_path="model/bittle_mujoco.xml",
+            length_joint_history=self.params.length_joint_history
         )
 
         self.sim = BittleSimulator(parameters=bittle_params)

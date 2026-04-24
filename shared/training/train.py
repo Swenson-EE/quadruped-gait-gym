@@ -2,6 +2,8 @@ from environment.base_bittle_environment import EnvironmentParameters
 from loggers.components_logger import ComponentsLogger
 from runner.training_job import TrainingJob, training_job_parser
 
+from shared.config.hyperparameters import Hyperparameters
+from shared.rewards.rewards import RewardWeights
 from shared.training.training_status import TrainingStatus
 
 import numpy as np
@@ -20,21 +22,49 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         print("-" * 30)
 
         
-        weights = None
-        with open("config/reward_weights.json") as file:
-            weights = json.load(file)
+        weights = {}
+        try:
+            with open("config/reward_weights.json") as file:
+                weights = json.load(file)
+                print("weight config found")
+        except FileNotFoundError:
+            print("No weights config found; using defaults")
+        weights = RewardWeights.from_dict(weights)
+
+
+        hyperparameters = {}
+        try:
+            with open("config/hyperparameters.json") as file:
+                hyperparameters = json.load(file)
+                print('hyperparameter config found')
+        except FileNotFoundError:
+            print("no hyperparameter config found; using defaults")
+
+        hyperparameters = Hyperparameters.from_dict(hyperparameters)
+
+
+        environment_parameters = {}
+        try:
+            with open("config/environment_parameters.json") as file:
+                environment_parameters = json.load(file)
+                print('environment config found')
+        except FileNotFoundError:
+            print("no environment config found; using defaults")
+
+        environment_parameters = EnvironmentParameters.from_dict(environment_parameters)
+        environment_parameters.total_length = training_job.total_steps / training_job.parallel_env
+
+
             
 
         from shared.algorithm.algorithm_info import get_algo_vec_environment, get_algo_model, get_algorithm_class
-        algo_env_class, algo_env_parameters = get_algorithm_class(training_job.algo)
+        algo_env_class = get_algorithm_class(training_job.algo)
 
         env = get_algo_vec_environment(
             algo_env_class, 
             training_job.parallel_env, 
-            parameters=algo_env_parameters(
-                total_length=training_job.total_steps / training_job.parallel_env
-            ),
-            weights=weights or {}
+            parameters=environment_parameters,
+            weights=weights
         )
         if env is None:
             return (TrainingStatus.NO_ENV, "No environment instantiated")
@@ -42,11 +72,10 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         print('Created environment')
         
         
-        ModelClass, model_parameters = get_algo_model(training_job.algo)
+        ModelClass = get_algo_model(training_job.algo)
 
         if ModelClass is None:
             return (TrainingStatus.NO_MODEL, "No model instantiated")
-
             
         model = None
         
@@ -83,25 +112,30 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
                 activation_fn=activation_fn,
                 net_arch=training_job.net_arch
             )
-            model_parameters.setdefault('policy_kwargs', policy_kwargs)
+            # model_parameters.setdefault('policy_kwargs', policy_kwargs)
 
 
             model = ModelClass(
                 'MultiInputPolicy',
                 env,
-                **model_parameters,
+                #**model_parameters,
 
-                learning_rate=training_job.lr,
-                gamma=training_job.discount_factor,
-                        
+                # learning_rate=training_job.lr,
+                # gamma=training_job.discount_factor,
+                policy_kwargs=policy_kwargs,
+
+                learning_rate=hyperparameters.learning_rate,
+                batch_size=hyperparameters.batch_size,
+                gamma=hyperparameters.discount_factor,
+                ent_coef=hyperparameters.entropy_coeff,
+                
+
                 n_steps=int((training_job.batch_steps) / training_job.parallel_env),
 
                 seed=training_job.seed,
                 device=training_job.device,
                 verbose=training_job.verbose
             )
-
-            print('net_arch:', model.policy_kwargs["net_arch"])
 
 
         

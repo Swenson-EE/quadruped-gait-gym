@@ -23,7 +23,6 @@ class BittleParameters:
     control_dt = 0.01
 
     length_joint_history: int = 50
-    joint_max: int = 90
 
 
 class BittleSimulator:

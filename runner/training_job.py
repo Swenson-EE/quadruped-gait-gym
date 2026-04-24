@@ -9,9 +9,6 @@ from shared.utils import build_parser_from_dataclass, parse_args_to_dataclass
 @dataclass
 class TrainingJob:
     algo: Algorithm = Algorithm.SAC
-    
-    lr: float = 1e-3
-    discount_factor: float = 0.9
 
     net_arch: list[int] = field(default_factory=lambda: [64, 64, 64, 64])
     activation: str = "tanh"
@@ -19,7 +16,6 @@ class TrainingJob:
     seed: int = 42
     parallel_env: int = 8
     total_steps: int = 1e4
-    batch_steps: int = 2048
     
     device: str = 'cpu' # 'cuda' for gpu, and 'cpu' for cpu
     recording_frequency: int = 10

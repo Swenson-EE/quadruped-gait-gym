@@ -6,7 +6,6 @@ from typing import Type
 
 def get_algo_model(algo: Algorithm):
     ModelClass = None
-    model_parameters = {}
 
     match algo:
         case Algorithm.SAC:
@@ -28,18 +27,18 @@ def get_algo_model(algo: Algorithm):
         case _:
             ModelClass = None
 
-    return ModelClass, model_parameters
+    return ModelClass
 
 
 
-def get_algorithm_class(algorithm: Algorithm) -> tuple[Type[BaseBittleEnvironment] | None, Type[EnvironmentParameters] | None]:
+def get_algorithm_class(algorithm: Algorithm) -> Type[BaseBittleEnvironment] | None:
     match algorithm:
         case Algorithm.SAC | Algorithm.DDPG | Algorithm.PPO_C:
-           from environment.continuous_bittle_environment import ContinuousBittleEnvironment, ContinuousEnvironmentParameters
-           return ContinuousBittleEnvironment, ContinuousEnvironmentParameters
+           from environment.continuous_bittle_environment import ContinuousBittleEnvironment
+           return ContinuousBittleEnvironment
         case Algorithm.PPO_D | Algorithm.A2C:
-            from environment.discrete_bittle_environment import DiscreteBittleEnvironment, DiscreteEnvironmentParameters
-            return DiscreteBittleEnvironment, DiscreteEnvironmentParameters
+            from environment.discrete_bittle_environment import DiscreteBittleEnvironment
+            return DiscreteBittleEnvironment
         case _:
             print("Invalid algorithm:", algorithm)    
 
@@ -47,10 +46,10 @@ def get_algorithm_class(algorithm: Algorithm) -> tuple[Type[BaseBittleEnvironmen
 
 
 def get_algo_environment(algo: Algorithm, parameters = {}, weights = {}):
-    algorithm_class, algo_env_parameters = get_algorithm_class(algo)
+    algorithm_class = get_algorithm_class(algo)
 
     if algorithm_class is not None:
-        return algorithm_class(parameters=algo_env_parameters(**parameters), weights=weights)
+        return algorithm_class(parameters=EnvironmentParameters(**parameters), weights=weights)
             
     return None
 

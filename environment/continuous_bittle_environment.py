@@ -4,18 +4,16 @@ import gymnasium as gym
 import numpy as np
 
 from environment.base_bittle_environment import BaseBittleEnvironment, EnvironmentParameters
+from shared.rewards.rewards import RewardWeights
 
 
-@dataclass
-class ContinuousEnvironmentParameters(EnvironmentParameters):
-    joint_max_delta: int = np.deg2rad(25)
 
 
-class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentParameters]):
+class ContinuousBittleEnvironment(BaseBittleEnvironment):
 
     
 
-    def __init__(self, parameters: ContinuousEnvironmentParameters = ContinuousEnvironmentParameters(), weights = {}):
+    def __init__(self, parameters: EnvironmentParameters = EnvironmentParameters(), weights = RewardWeights()):
         super().__init__(parameters=parameters, weights=weights)
 
         self.action_space = gym.spaces.Box(
@@ -26,7 +24,4 @@ class ContinuousBittleEnvironment(BaseBittleEnvironment[ContinuousEnvironmentPar
 
 
     def decode_action(self, action):
-        #joint_targets = action * self.params.joint_delta
-       # decoded = np.deg2rad(action * self.sim.params.joint_max)
-
         return action
