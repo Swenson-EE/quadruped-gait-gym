@@ -2,6 +2,7 @@ from environment.base_bittle_environment import EnvironmentParameters
 from loggers.components_logger import ComponentsLogger
 from runner.training_job import TrainingJob, training_job_parser
 
+from shared.algorithm.model_factory import ModelFactory
 from shared.config.hyperparameters import Hyperparameters
 from shared.rewards.rewards import RewardWeights
 from shared.training.training_status import TrainingStatus
@@ -112,24 +113,19 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
                 activation_fn=activation_fn,
                 net_arch=training_job.net_arch
             )
-            # model_parameters.setdefault('policy_kwargs', policy_kwargs)
+                
 
-
-            model = ModelClass(
-                'MultiInputPolicy',
+            model = ModelFactory.create(
+                ModelClass,
                 env,
-                #**model_parameters,
-
-                # learning_rate=training_job.lr,
-                # gamma=training_job.discount_factor,
                 policy_kwargs=policy_kwargs,
 
                 learning_rate=hyperparameters.learning_rate,
-                batch_size=hyperparameters.batch_size,
+                
                 gamma=hyperparameters.discount_factor,
                 ent_coef=hyperparameters.entropy_coeff,
                 
-
+                batch_size=hyperparameters.batch_size,
                 n_steps=int((hyperparameters.batch_steps) / training_job.parallel_env),
 
                 seed=training_job.seed,
