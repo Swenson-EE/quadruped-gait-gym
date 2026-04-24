@@ -129,33 +129,16 @@ class BaseBittleEnvironment(gym.Env):
         info["start_position"] = start_pos
         info["end_position"] = end_pos
 
-        info['reward'] = reward
-        info['penalty'] = penalty
-        info['observation'] = observation
-        info['components'] = sys_reward.get_components()
-
-        def print_comp(name):
-            print('-'*10, name, '-'*10)
-            if name in info['components']:
-                print(info['components'][name])
-
-                if name in penalty:
-                    print('penalty:', penalty[name])
-                elif name in reward:
-                    print('reward:', reward[name])
-                print('\n'*2)
-
-        #print_comp("joint_velocity")
-        #print_comp("joint_acceleration")
-        #print_comp("joint_jerk")
-        #print_comp("joint_energy")
-
-        #print_comp("forward_movement")
-        #print_comp("bent_joint")
-        
+        #info['reward'] = reward
+        #info['penalty'] = penalty
+        #info['observation'] = observation
+        #info['components'] = sys_reward.get_components()        
 
         total_reward, reward_sum, penalty_sum = compute_total(self.weights, reward, penalty)
-    
+
+        info["reward_sum"] = reward_sum
+        info["penalty_sum"] = penalty_sum
+
 
         terminated = False
         truncated = False

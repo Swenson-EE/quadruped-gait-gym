@@ -1,5 +1,6 @@
 from environment.base_bittle_environment import EnvironmentParameters
 from loggers.components_logger import ComponentsLogger
+from loggers.reward_sum_logger import RewardSumLogger
 from runner.training_job import TrainingJob, training_job_parser
 
 from shared.algorithm.model_factory import ModelFactory
@@ -153,13 +154,16 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
             name=trained_name,
             algo=training_job.algo,
             loggers=[
-                RewardLogger(
-                    log_frequency=training_job.recording_frequency
-                ),
-                ObservationLogger(
-                    log_frequency=training_job.recording_frequency
-                ),
-                ComponentsLogger(
+                # RewardLogger(
+                #     log_frequency=training_job.recording_frequency
+                # ),
+                # ObservationLogger(
+                #     log_frequency=training_job.recording_frequency
+                # ),
+                # ComponentsLogger(
+                #     log_frequency=training_job.recording_frequency
+                # )
+                RewardSumLogger(
                     log_frequency=training_job.recording_frequency
                 )
             ],
