@@ -14,7 +14,7 @@ class TrainingJob:
     discount_factor: float = 0.9
 
     net_arch: list[int] = field(default_factory=lambda: [64, 64, 64, 64])
-    
+    activation: str = "tanh"
     
     seed: int = 42
     parallel_env: int = 8

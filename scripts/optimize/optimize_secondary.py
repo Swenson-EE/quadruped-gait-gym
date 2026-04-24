@@ -61,8 +61,6 @@ class SecondaryWeightOptimizer(Optimizer):
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
     args.optimization_name = "secondary_optimization"
-    args.n_steps = 1e3
-    args.n_trials = 1
 
     optimizer = SecondaryWeightOptimizer(args=args)
     optimizer.run()

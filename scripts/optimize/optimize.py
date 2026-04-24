@@ -11,6 +11,7 @@ from shared.utils.dataclass_parser import build_parser_from_dataclass, parse_arg
 import os
 import pandas as pd
 import numpy as np
+import torch
 
 from stable_baselines3.common.monitor import Monitor
 
@@ -139,12 +140,22 @@ class Optimizer:
         #print(f"model_params\n{model_parameters}\n")
 
 
+        activation_fn = torch.nn.Tanh
+        match hyperparameters.activation:
+            case "tanh":
+                activation_fn = torch.nn.Tanh
+            case "relu":
+                activation_fn = torch.nn.ReLU
+            case "leaky-relu":
+                activation_fn = torch.nn.LeakyReLU
+
         model = model_class(
             'MultiInputPolicy',
             env,
             seed=42,
             policy_kwargs={
-                "net_arch": [64, 64]
+                "net_arch": [64, 64],
+                "activation_fn": activation_fn
             },
             verbose=0,
             #**model_parameters,            
@@ -204,36 +215,7 @@ class Optimizer:
         vals = np.array(list(d.values()))
         vals = vals / np.sum(vals)
         return dict(zip(d.keys(), vals))
-
-    # def suggest(self, cls, trial, patterns: list[str]):
-    #     from dataclasses import fields, is_dataclass
-
-    #     import fnmatch
-
-    #     def is_selected(full_name: str, patterns: list[str]) -> bool:
-    #         return any(fnmatch.fnmatch(full_name, p) for p in patterns)
-        
-        
-    #     def suggest_from_dataclass(dc_cls, prefix=""):
-    #         result = {}
-
-    #         for f in fields(dc_cls):
-    #             name = f.name
-    #             full_name = f"{prefix}.{name}" if prefix else name
-
-    #             if is_dataclass(f.type):
-    #                 result[name] = suggest_from_dataclass(f.type, full_name)
-    #             else:
-    #                 if is_selected(full_name, patterns):
-    #                     result[name] = trial.suggest_float(
-    #                         full_name, self.LOW, self.HIGH, log=True
-    #                     )
-    #                 else:
-    #                     result[name] = 0.0
-
-    #         return result
-
-    #     return suggest_from_dataclass(cls)
+    
     
     def suggest(self, cls, trial, suggest_config: dict):
         from dataclasses import fields, is_dataclass
@@ -339,108 +321,114 @@ class Optimizer:
         pass
 
     def plot_study(self, study: optuna.Study):
-        # ===================================
-        #           Overall plots
-        # ===================================
-        os.makedirs(os.path.join(self.SAVE_DIR, "overall"), exist_ok=True)
+        try:
+            # ===================================
+            #           Overall plots
+            # ===================================
+            os.makedirs(os.path.join(self.SAVE_DIR, "overall"), exist_ok=True)
 
-        target_name = "Overall Score"
-        fig = vis.plot_pareto_front(
-            study,
-            target_names=["forward", "lateral", "z"]
-        )
-        fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"optimization_history_overall.png"))
-
-
-        trial_target = lambda t: t.values[0] - (self.LATERAL_WEIGHT*t.values[1]) - (self.Z_WEIGHT*t.values[2])
-
-        fig = vis.plot_param_importances(
-            study,
-            target=trial_target,
-            target_name=target_name
-        )
-        fig.update_layout(title="Overall Hyperparameter Importance")
-        fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"param_importances_overall.png"))
-
-        # Parallel coordinate
-        fig = vis.plot_optimization_history(
-            study,
-            target=trial_target,
-            target_name=target_name
-        )
-        fig.update_layout(title="Overall Optimization History")
-        fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"optimization_history_overall.png"))
-
-
-        pairs = [
-            (0, 1, "forward_vs_lateral"),
-            (0, 2, "forward_vs_z"),
-            (1, 2, "lateral_vs_z")
-        ]
-
-        for i, j, name in pairs:
+            target_name = "Overall Score"
             fig = vis.plot_pareto_front(
                 study,
-                target_names=["Forward, Lateral", "Z"],
-                targets=lambda t: (t.values[i], t.values[j])
+                target_names=["forward", "lateral", "z"]
             )
-            fig.update_layout(title=name.replace("_", " ").title())
-            fig.write_image(os.path.join(self.SAVE_DIR, f"pareto_{name}.png"))
+            fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"optimization_history_overall.png"))
 
 
-
-        # ===================================
-        #           Individual plots
-        # ===================================        
-        trial_values = {
-            0: "forward",
-            1: "lateral",
-            2: "z"
-        }
-
-
-        for index, name in trial_values.items():
-            trial_dir = os.path.join(self.SAVE_DIR, name)
-            os.makedirs(trial_dir, exist_ok=True)
-
-            target_name = f"{name.capitalize()} Distance"
+            trial_target = lambda t: t.values[0] - (self.LATERAL_WEIGHT*t.values[1]) - (self.Z_WEIGHT*t.values[2])
 
             fig = vis.plot_param_importances(
                 study,
-                target=lambda t: t.values[index],
+                target=trial_target,
                 target_name=target_name
             )
-            fig.update_layout(title=f"{name.capitalize()} Hyperparameter Importances")
-            fig.write_image(os.path.join(trial_dir, f"param_importance_{name}.png"))
+            fig.update_layout(title="Overall Hyperparameter Importance")
+            fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"param_importances_overall.png"))
 
-
-            fig = vis.plot_slice(
+            # Parallel coordinate
+            fig = vis.plot_optimization_history(
                 study,
-                target=lambda t: t.values[index],
+                target=trial_target,
                 target_name=target_name
             )
-            fig.update_layout(title=f"{name.capitalize()} Slice Plot")
-            fig.write_image(os.path.join(trial_dir, f"slice_{name}.png"))
+            fig.update_layout(title="Overall Optimization History")
+            fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"optimization_history_overall.png"))
 
 
-            fig = vis.plot_contour(
-                study,
-                target=lambda t: t.values[index],
-                target_name=target_name
-            )
-            fig.update_layout(title=f"{name.capitalize()} Contour Plot")
-            fig.write_image(os.path.join(trial_dir, f"contour_{name}.png"))
+            pairs = [
+                (0, 1, "forward_vs_lateral"),
+                (0, 2, "forward_vs_z"),
+                (1, 2, "lateral_vs_z")
+            ]
+
+            for i, j, name in pairs:
+                fig = vis.plot_pareto_front(
+                    study,
+                    target_names=["Forward, Lateral", "Z"],
+                    targets=lambda t: (t.values[i], t.values[j])
+                )
+                fig.update_layout(title=name.replace("_", " ").title())
+                fig.write_image(os.path.join(self.SAVE_DIR, f"pareto_{name}.png"))
 
 
 
-            fig = vis.plot_parallel_coordinate(
-                study,
-                params=None,
-                target=lambda t: t.values[index],
-                target_name=target_name
-            )
-            fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
-            fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
+            # ===================================
+            #           Individual plots
+            # ===================================        
+            trial_values = {
+                0: "forward",
+                1: "lateral",
+                2: "z"
+            }
+
+
+            for index, name in trial_values.items():
+                trial_dir = os.path.join(self.SAVE_DIR, name)
+                os.makedirs(trial_dir, exist_ok=True)
+
+                target_name = f"{name.capitalize()} Distance"
+
+                fig = vis.plot_param_importances(
+                    study,
+                    target=lambda t: t.values[index],
+                    target_name=target_name
+                )
+                fig.update_layout(title=f"{name.capitalize()} Hyperparameter Importances")
+                fig.write_image(os.path.join(trial_dir, f"param_importance_{name}.png"))
+
+
+                fig = vis.plot_slice(
+                    study,
+                    target=lambda t: t.values[index],
+                    target_name=target_name
+                )
+                fig.update_layout(title=f"{name.capitalize()} Slice Plot")
+                fig.write_image(os.path.join(trial_dir, f"slice_{name}.png"))
+
+
+                fig = vis.plot_contour(
+                    study,
+                    target=lambda t: t.values[index],
+                    target_name=target_name
+                )
+                fig.update_layout(title=f"{name.capitalize()} Contour Plot")
+                fig.write_image(os.path.join(trial_dir, f"contour_{name}.png"))
+
+
+
+                fig = vis.plot_parallel_coordinate(
+                    study,
+                    params=None,
+                    target=lambda t: t.values[index],
+                    target_name=target_name
+                )
+                fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
+                fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
+        except Exception as e:
+            print("-"*5, "[PLOT ERROR]", '-'*5)
+            print(e)
+            
+    
 
 
     def create_study(self) -> optuna.Study:
@@ -467,6 +455,7 @@ class Optimizer:
         import torch
         torch.set_num_threads(self.args.n_threads)
 
+        print("#"*10, f"[{self.args.optimization_name}]", "#"*10)
         print("#"*10, f"[TRAINING {self.args.algorithm.value.upper()}]", "#"*10)
         print(self.args.n_trials, "trials")
         print(self.args.n_jobs, "jobs")

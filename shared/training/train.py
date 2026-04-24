@@ -6,6 +6,7 @@ from shared.training.training_status import TrainingStatus
 
 import numpy as np
 import json
+import torch
 
 
 def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
@@ -66,7 +67,24 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
         if model is None:
             print(f"Creating new checkpoint (algo={training_job.algo}, layers=({training_job.net_arch}))")
             
-            model_parameters.setdefault('policy_kwargs', {})['net_arch'] = training_job.net_arch # neural network
+            #model_parameters.setdefault('policy_kwargs', {})['net_arch'] = training_job.net_arch # neural network
+            
+            activation_fn = torch.nn.Tanh
+            match training_job.activation:
+                case "tanh":
+                    activation_fn = torch.nn.Tanh
+                case "relu":
+                    activation_fn = torch.nn.ReLU
+                case "leaky-relu":
+                    activation_fn = torch.nn.LeakyReLU
+
+
+            policy_kwargs = dict(
+                activation_fn=activation_fn,
+                net_arch=training_job.net_arch
+            )
+            model_parameters.setdefault('policy_kwargs', policy_kwargs)
+
 
             model = ModelClass(
                 'MultiInputPolicy',
