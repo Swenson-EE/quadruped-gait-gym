@@ -28,6 +28,10 @@ class HyperparameterOptimizer(Optimizer):
                 "type": "categorical",
                 "choices": ["32", "64", "128", "256"]
             },
+            "batch_steps": {
+                "type": "categorical",
+                "choices": ["512", "1024", "2048"]
+            },
             "discount_factor": {
                 "type": "float",
                 "low": 0.9,
@@ -52,6 +56,7 @@ class HyperparameterOptimizer(Optimizer):
         suggested_parameters = self.suggest(Hyperparameters, trial, self.suggest_config)
 
         suggested_parameters["batch_size"] = int(suggested_parameters["batch_size"])
+        suggested_parameters["batch_steps"] = int(suggested_parameters["batch_steps"])
         new_hyperparameters = Hyperparameters.from_dict(suggested_parameters)
 
         return new_hyperparameters

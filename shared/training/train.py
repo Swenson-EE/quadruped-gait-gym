@@ -130,7 +130,7 @@ def train(training_job: TrainingJob) -> tuple[TrainingStatus, str]:
                 ent_coef=hyperparameters.entropy_coeff,
                 
 
-                n_steps=int((training_job.batch_steps) / training_job.parallel_env),
+                n_steps=int((hyperparameters.batch_steps) / training_job.parallel_env),
 
                 seed=training_job.seed,
                 device=training_job.device,
