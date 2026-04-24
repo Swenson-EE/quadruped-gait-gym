@@ -4,6 +4,7 @@ import json
 from shared.algorithm.algorithm_types import Algorithm
 
 from shared.algorithm.algorithm_info import get_algorithm_class, get_algo_model
+from shared.config.hyperparameters import Hyperparameters
 from shared.rewards import RewardWeights
 from shared.utils.dataclass_parser import build_parser_from_dataclass, parse_args_to_dataclass
 
@@ -55,8 +56,10 @@ class Optimizer:
         self.LATERAL_WEIGHT = 0.9
         self.Z_WEIGHT = 0.6
 
-        self.LOW = 0.001
-        self.HIGH = 1.0
+        #self.LOW = 0.001
+        #self.HIGH = 1.0
+        
+        self.suggest_config = {}
 
         self.SAVE_DIR = os.path.join(LOG_DIR, args.optimization_name)
 
@@ -120,7 +123,8 @@ class Optimizer:
 
         weights = self.get_weights(trial)
         env_params = self.get_environment_parameters(trial)
-        model_parameters = model_parameters | self.get_model_parameters(trial)
+        hyperparameters = self.get_model_parameters(trial)
+        #model_parameters = model_parameters | self.get_model_parameters(trial)
 
         #print(f'test\n{environment_parameters_cls(**env_params)}\n\n')
 
@@ -143,7 +147,7 @@ class Optimizer:
                 "net_arch": [64, 64]
             },
             verbose=0,
-            **model_parameters,            
+            #**model_parameters,            
         )
 
         model.learn(total_timesteps=self.args.n_steps)
@@ -201,16 +205,96 @@ class Optimizer:
         vals = vals / np.sum(vals)
         return dict(zip(d.keys(), vals))
 
-    def suggest(self, cls, trial, patterns: list[str]):
+    # def suggest(self, cls, trial, patterns: list[str]):
+    #     from dataclasses import fields, is_dataclass
+
+    #     import fnmatch
+
+    #     def is_selected(full_name: str, patterns: list[str]) -> bool:
+    #         return any(fnmatch.fnmatch(full_name, p) for p in patterns)
+        
+        
+    #     def suggest_from_dataclass(dc_cls, prefix=""):
+    #         result = {}
+
+    #         for f in fields(dc_cls):
+    #             name = f.name
+    #             full_name = f"{prefix}.{name}" if prefix else name
+
+    #             if is_dataclass(f.type):
+    #                 result[name] = suggest_from_dataclass(f.type, full_name)
+    #             else:
+    #                 if is_selected(full_name, patterns):
+    #                     result[name] = trial.suggest_float(
+    #                         full_name, self.LOW, self.HIGH, log=True
+    #                     )
+    #                 else:
+    #                     result[name] = 0.0
+
+    #         return result
+
+    #     return suggest_from_dataclass(cls)
+    
+    def suggest(self, cls, trial, suggest_config: dict):
         from dataclasses import fields, is_dataclass
 
         import fnmatch
 
-        def is_selected(full_name: str, patterns: list[str]) -> bool:
-            return any(fnmatch.fnmatch(full_name, p) for p in patterns)
-        
-        
-        def suggest_from_dataclass(dc_cls, prefix=""):
+        # -----------------------------
+        # Pattern matching (with priority)
+        # -----------------------------
+        def find_config(name: str):
+            matches = []
+
+            for pattern, cfg in suggest_config.items():
+                if fnmatch.fnmatch(name, pattern):
+                    matches.append((pattern, cfg))
+
+            if not matches:
+                return None
+
+            # More specific pattern wins (longest string)
+            matches.sort(key=lambda x: len(x[0]), reverse=True)
+            return matches[0][1]
+
+        # -----------------------------
+        # Suggest value based on config
+        # -----------------------------
+        def suggest_value(name: str, cfg: dict):
+            t = cfg["type"]
+
+            if t == "float":
+                return trial.suggest_float(
+                    name,
+                    cfg["low"],
+                    cfg["high"],
+                    log=cfg.get("log", False),
+                    step=cfg.get("step", None)
+                )
+
+            elif t == "int":
+                return trial.suggest_int(
+                    name,
+                    cfg["low"],
+                    cfg["high"],
+                    step=cfg.get("step", 1),
+                    log=cfg.get("log", False)
+                )
+
+            elif t == "categorical":
+                return trial.suggest_categorical(
+                    name,
+                    cfg["choices"]
+                )
+
+            else:
+                raise ValueError(f"Unsupported suggest type: {t}")
+
+        # -----------------------------
+        # Recursive builder
+        # -----------------------------
+        def recurse(dc_cls, prefix=""):
+            instance = dc_cls()  # get defaults
             result = {}
 
             for f in fields(dc_cls):
@@ -218,19 +302,21 @@ class Optimizer:
                 full_name = f"{prefix}.{name}" if prefix else name
 
                 if is_dataclass(f.type):
-                    result[name] = suggest_from_dataclass(f.type, full_name)
+                    result[name] = recurse(f.type, full_name)
                 else:
-                    if is_selected(full_name, patterns):
-                        result[name] = trial.suggest_float(
-                            full_name, self.LOW, self.HIGH, log=True
-                        )
+                    cfg = find_config(full_name)
+
+                    if cfg:
+                        result[name] = suggest_value(full_name, cfg)
                     else:
-                        result[name] = 0.0
+                        # fallback to default value
+                        result[name] = getattr(instance, name)
 
             return result
 
-        return suggest_from_dataclass(cls)
-    
+        return recurse(cls)
+
+
 
     def get_weights(self, trial: optuna.Trial) -> RewardWeights:
         weights: RewardWeights = RewardWeights.from_json_file("config/reward_weights.json")
@@ -240,8 +326,8 @@ class Optimizer:
     def get_environment_parameters(self, trial: optuna.Trial):
         return {}
 
-    def get_model_parameters(self, trial: optuna.Trial):
-        return {}
+    def get_model_parameters(self, trial: optuna.Trial) -> Hyperparameters:
+        return Hyperparameters()
     
 
     def print_best_results(self, best_trial: optuna.trial.FrozenTrial):

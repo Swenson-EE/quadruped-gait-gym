@@ -12,18 +12,37 @@ from .optimize import Optimizer, OptimizeArguments, optimize_arguments_parser
 
 
 class PrimaryWeightOptimizer(Optimizer):
+    def __init__(self, args: OptimizeArguments):
+        super().__init__(args)
+
+        self.suggest_config = {
+            "reward.primary.*": {
+                "type": "float",
+                "low": 0.001,
+                "high": 1.0
+            },
+            "reward.primary_scale": {
+                "type": "float",
+                "low": 0.001,
+                "high": 1.0
+            },
+            "penalty.primary.*": {
+                "type": "float",
+                "low": 0.001,
+                "high": 1.0
+            },
+            "penalty.primary_scale": {
+                "type": "float",
+                "low": 0.001,
+                "high": 1.0
+            }
+        }
 
     def get_weights(self, trial: optuna.Trial):
         weights: RewardWeights = super().get_weights(trial)
-
-        selected_fields = [
-            "reward.primary.*",
-            "reward.primary_scale",
-
-            "penalty.primary.*",
-            "penalty.primary_scale"
-        ]
-        suggested_weights = self.suggest(RewardWeights, trial, selected_fields)
+        
+        suggested_weights = self.suggest(RewardWeights, trial, self.suggest_config)
+        
         suggested_weights["reward"]["primary"] = self.normalize(suggested_weights["reward"]["primary"])
         suggested_weights["penalty"]["primary"] = self.normalize(suggested_weights["penalty"]["primary"])
 
@@ -42,6 +61,8 @@ class PrimaryWeightOptimizer(Optimizer):
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
     args.optimization_name = "primary_optimization"
+    args.n_steps = 1e3
+    args.n_trials = 1
 
     optimizer = PrimaryWeightOptimizer(args=args)
     optimizer.run()

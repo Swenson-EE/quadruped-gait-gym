@@ -3,6 +3,7 @@ import json
 from dacite import from_dict
 from typing import TypeVar, Type
 
+from shared.config.config_cls import ConfigCls
 from shared.utils import build_from_flat
 
 # @dataclass
@@ -106,29 +107,29 @@ class Penalty:
 
 
 @dataclass
-class RewardWeights:
+class RewardWeights(ConfigCls):
 
     reward: Reward = field(default_factory=Reward)
     penalty: Penalty = field(default_factory=Penalty)
+    
 
+    # @classmethod
+    # def from_json_file(cls, filepath: str) -> "RewardWeights":
+    #     with open(filepath, "r") as f:
+    #         data = json.load(f)
 
-    @classmethod
-    def from_json_file(cls, filepath: str) -> "RewardWeights":
-        with open(filepath, "r") as f:
-            data = json.load(f)
+    #     return from_dict(data_class=RewardWeights, data=data)
 
-        return from_dict(data_class=RewardWeights, data=data)
+    # @classmethod
+    # def from_dict(cls, data: dict):
+    #     return from_dict(data_class=cls, data=data)
 
-    @classmethod
-    def from_dict(cls, data: dict):
-        return from_dict(data_class=cls, data=data)
+    # @classmethod
+    # def from_flat_dict(cls, flat: dict) -> "RewardWeights":
+    #     with open("config/reward_weights.json") as f:
+    #         defaults = json.load(f)
 
-    @classmethod
-    def from_flat_dict(cls, flat: dict) -> "RewardWeights":
-        with open("config/reward_weights.json") as f:
-            defaults = json.load(f)
-
-        return build_from_flat(cls, flat, defaults=defaults)
+    #     return build_from_flat(cls, flat, defaults=defaults)
     
 
 def sum_group(weights: RewardWeights, values: dict):

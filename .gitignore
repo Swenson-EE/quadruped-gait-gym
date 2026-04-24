@@ -5,7 +5,7 @@ __pycache__/
 saved/
 
 # Config files
-config/
+/config/
 scheduler_config.json
 
 # TEMPORARY: Until ready to work on runtime environment

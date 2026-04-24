@@ -17,20 +17,34 @@ class SecondaryWeightOptimizer(Optimizer):
 
         self.LOW = 1e-4
         self.HIGH = 1e-2
+        self.suggest_config = {
+            "reward.secondary.*": {
+                "type": "float",
+                "low": 1e-4,
+                "high": 1e-2
+            },
+            "reward.secondary_scale": {
+                "type": "float",
+                "low": 1e-4,
+                "high": 1e-2
+            },
+            "penalty.secondary.*": {
+                "type": "float",
+                "low": 1e-4,
+                "high": 1e-2
+            },
+            "penalty.secondary_scale": {
+                "type": "float",
+                "low": 1e-4,
+                "high": 1e-2
+            }
+        }
 
 
     def get_weights(self, trial: optuna.Trial):
         weights: RewardWeights = super().get_weights(trial)
 
-        selected_fields = [
-            "reward.secondary.*",
-            "reward.secondary_scale",
-
-            "penalty.secondary.*",
-            "penalty.secondary_scale"
-        ]
-
-        suggested_weights = self.suggest(RewardWeights, trial, selected_fields)
+        suggested_weights = self.suggest(RewardWeights, trial, self.suggest_config)
         suggested_weights["reward"]["secondary"] = self.normalize(suggested_weights["reward"]["secondary"])
         suggested_weights["penalty"]["secondary"] = self.normalize(suggested_weights["penalty"]["secondary"])
 
@@ -47,6 +61,8 @@ class SecondaryWeightOptimizer(Optimizer):
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
     args.optimization_name = "secondary_optimization"
+    args.n_steps = 1e3
+    args.n_trials = 1
 
     optimizer = SecondaryWeightOptimizer(args=args)
     optimizer.run()
