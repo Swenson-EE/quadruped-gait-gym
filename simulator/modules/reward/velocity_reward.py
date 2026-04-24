@@ -41,8 +41,8 @@ class VelocityReward(RewardSubsystem):
             "forward_velocity": velocity[0],
         }
         penalty = {
-            #"lateral_velocity": abs(velocity[1]),
-            #"z_velocity": abs(velocity[2])
+            "lateral_velocity": abs(velocity[1]),
+            "z_velocity": abs(velocity[2])
         }
 
         return reward, penalty

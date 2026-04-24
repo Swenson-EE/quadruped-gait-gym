@@ -38,7 +38,6 @@ def get_algorithm_class(algorithm: Algorithm) -> tuple[Type[BaseBittleEnvironmen
            from environment.continuous_bittle_environment import ContinuousBittleEnvironment, ContinuousEnvironmentParameters
            return ContinuousBittleEnvironment, ContinuousEnvironmentParameters
         case Algorithm.PPO_D | Algorithm.A2C:
-            print(f'Discrete algorithm ({algorithm})')
             from environment.discrete_bittle_environment import DiscreteBittleEnvironment, DiscreteEnvironmentParameters
             return DiscreteBittleEnvironment, DiscreteEnvironmentParameters
         case _:

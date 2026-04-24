@@ -6,6 +6,7 @@ import json
 
 from environment.base_bittle_environment import BaseBittleEnvironment
 from environment.continuous_bittle_environment import ContinuousBittleEnvironment
+from shared.rewards import RewardWeights
 
 TEST_MODE = "manual"  # Set to "manual" for manual stepping, "auto" for automatic stepping
 ENVIRONMENT = 'c'
@@ -19,10 +20,12 @@ def key_callback(keycode):
 if __name__ == "__main__":
     np.set_printoptions(linewidth=120)
 
-    weights = {}
+    weight_config = {}
     with open("config/reward_weights.json") as file:
-        weights = json.load(file)
-        
+        weight_config = json.load(file)
+    
+    weights: RewardWeights = RewardWeights.from_json_file("config/reward_weights.json")
+    #print(weights.reward)
 
     env: BaseBittleEnvironment = None
     match ENVIRONMENT.lower():

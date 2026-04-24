@@ -8,7 +8,7 @@ from simulator.modules.reward_module import Reward
 import numpy as np
 
 
-#@register_module(Reward)
+@register_module(Reward)
 class JointReward(RewardSubsystem):
     
     def initialize(self):

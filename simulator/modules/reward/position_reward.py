@@ -76,7 +76,7 @@ class PositionReward(RewardSubsystem):
             #"lateral_movement": abs(self.dy),
             #"z_movement": abs(self.dz)
             "height": height_error,
-            #"lateral_movement": abs(self.y)
+            "lateral_movement": abs(self.y)
         }
 
         return reward, penalty

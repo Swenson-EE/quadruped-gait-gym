@@ -6,7 +6,8 @@ import numpy as np
 
 #from parameters import rewards
 from shared.rewards.components import RewardComponents, RewardNormalizationFactors, normalize_reward_components
-from shared.rewards.rewards import Rewards
+from shared.rewards import RewardWeights
+from shared.rewards.rewards import compute_total
 from simulator.bittle_sim import BittleParameters, BittleSimulator
 
 #from shared.pickle.pickle_fields import find_unpickable_fields
@@ -26,7 +27,7 @@ class EnvironmentParameters:
     joint_min: int = -120
     joint_max: int = 120
     
-    joint_delta: int = 30
+    joint_delta: int = 25
     
     phase_rate: float = 1.0
 
@@ -40,15 +41,12 @@ T = TypeVar("T", bound=EnvironmentParameters)
 
 class BaseBittleEnvironment(gym.Env, Generic[T]):
     
-    def __init__(self, parameters: T = EnvironmentParameters(), weights = {}):
+    def __init__(self, parameters: T = EnvironmentParameters(), weights = RewardWeights()):
         super().__init__()
 
         self.params = parameters
         self.weights = weights
 
-        #if self.params.rewards is None:
-        #    self.params.rewards = Rewards.from_json_file('config/rewards.json')
-        
 
         bittle_params = BittleParameters(
             model_path="model/bittle_mujoco.xml"
@@ -60,9 +58,7 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
         self.JOINT_HISTORY_DIM = (self.sim.params.length_joint_history, self.sim.NUM_JOINTS)
         self.GYRO_DIM = 3
         self.ACCEL_DIM = 3
-        #self.IMU_DIM = self.sim.NUM_IMU_OBS
         self.PAW_CONTACT_DIM = 4
-        #self.OBSERVATION_DIM = JOINT_HISTORY_DIM + IMU_DIM + PAW_CONTACT_DIM
 
         self.step_count = 0
         self.total_session_step_count = 0
@@ -157,32 +153,9 @@ class BaseBittleEnvironment(gym.Env, Generic[T]):
 
         #print_comp("forward_movement")
         #print_comp("bent_joint")
-
-        reward_total = 0
-        if "reward" in self.weights:
-            for k, v in reward.items():
-                reward_total += (self.weights["reward"].get(k, 0.0) * v)
-
-        penalty_total = 0
-        if "penalty" in self.weights:
-            for k, v in penalty.items():
-                penalty_total -= (self.weights["penalty"].get(k, 0.0) * v)
-
-
-        reward_scale = self.weights.get("reward_scale", 1.0)
-        penalty_scale = self.weights.get("penalty_scale", 1.0)
-
-
-        total_reward = (reward_total * reward_scale) - (penalty_total * penalty_scale)
-
-        # print('\n'*2, '-'*10)
-        # print(reward)
-        # print(penalty)
         
-        # print('\n'*2, '-'*10)
-        # print(info['components'])
 
-        #total_reward = sum(reward.values()) - sum(penalty.values())
+        total_reward, reward_sum, penalty_sum = compute_total(self.weights, reward, penalty)
     
 
         terminated = False

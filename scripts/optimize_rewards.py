@@ -1,4 +1,5 @@
 import json
+import pprint
 
 import gymnasium as gym
 from stable_baselines3.common.monitor import Monitor
@@ -88,7 +89,7 @@ class Weights:
     @classmethod
     def from_flat_dict(cls, flat: dict) -> "Weights":
         flat = {
-            k: (round(v, 2) if isinstance(v, float) else v) for k, v in flat.items() 
+            k: (round(v, 5) if isinstance(v, float) else v) for k, v in flat.items() 
         }
 
         reward_fields = {f.name for f in fields(Weights.Reward)}
@@ -304,41 +305,11 @@ def plot_trials():
     plt.savefig(os.path.join(LOG_DIR,"training_curves.png"), dpi=300, bbox_inches="tight")
 
 
-# MAIN LOOP
-def main(args: OptimizeArguments):
-    study = optuna.create_study(
-        study_name="reward_optimization",
-        storage=f"sqlite:///{os.path.join(LOG_DIR, 'optuna_study.db')}",
-        load_if_exists=True,
-        directions=["maximize", "minimize", "minimize"],
-        sampler=TPESampler(multivariate=True),
-        pruner=optuna.pruners.MedianPruner()
-    )
-
-    study.optimize(
-        objective,
-        n_trials=args.n_trials,
-        n_jobs=args.n_jobs # increase for parallel jobs
-    )
-    
-
-    def _score_trials(t: optuna.trial.FrozenTrial):
+def _score_trials(t: optuna.trial.FrozenTrial):
         forward, lateral, z = t.values
         return forward - LATERAL_WEIGHT*lateral - Z_WEIGHT*z
-    
-    best_trial = max(study.best_trials, key=_score_trials)
-    print("\n", "="*5, " [BEST RESULT] ", "="*5)
-    print("Score:", best_trial.values)
-    print("Weights:", best_trial.params)
 
-
-    weights: Weights = Weights.from_flat_dict(best_trial.params) 
-    with open(os.path.join(LOG_DIR, "reward_weights.json"), "w") as f:
-        json.dump(asdict(weights), f, indent=4)
-
-    print("\n\nvalues:", best_trial.values)
-
-
+def plot(study: optuna.Study):
     # ===================================
     #           Overall plots
     # ===================================
@@ -447,6 +418,43 @@ def main(args: OptimizeArguments):
         )
         fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
         fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
+
+def save_weights(study: optuna.Study):
+    best_trial = max(study.best_trials, key=_score_trials)
+
+    weights: Weights = Weights.from_flat_dict(best_trial.params) 
+    with open(os.path.join(LOG_DIR, "reward_weights.json"), "w") as f:
+        json.dump(asdict(weights), f, indent=4)
+
+
+# MAIN LOOP
+def main(args: OptimizeArguments):
+    study = optuna.create_study(
+        study_name="reward_optimization",
+        storage=f"sqlite:///{os.path.join(LOG_DIR, 'optuna_study.db')}",
+        load_if_exists=True,
+        directions=["maximize", "minimize", "minimize"],
+        sampler=TPESampler(multivariate=True),
+        pruner=optuna.pruners.MedianPruner()
+    )
+
+    # study.optimize(
+    #     objective,
+    #     n_trials=args.n_trials,
+    #     n_jobs=args.n_jobs # increase for parallel jobs
+    # )
+    
+    
+    best_trial = max(study.best_trials, key=_score_trials)
+    print("\n", "="*5, " [BEST RESULT] ", "="*5)
+    print("Score:", best_trial.values)
+    print("Weights")
+    pprint.pprint(best_trial.params, width=50)
+
+    save_weights(study)
+
+    # plot(study)
+    
 
         # fig = vis.plot_param_importances(
         #     study,
