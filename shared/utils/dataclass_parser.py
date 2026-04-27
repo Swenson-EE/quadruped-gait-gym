@@ -14,11 +14,11 @@ def str2bool(v):
         raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
-def build_parser_from_dataclass(dc, defaults: dict | None = None):
+def build_parser_from_dataclass(dc, parser = None, defaults: dict | None = None):
     assert is_dataclass(dc)
 
     defaults = defaults or {}
-    parser = argparse.ArgumentParser()
+    parser = parser or argparse.ArgumentParser()
 
     for f in fields(dc):
         arg_name = f"--{f.name}"
@@ -86,8 +86,8 @@ def build_parser_from_dataclass(dc, defaults: dict | None = None):
     return parser
 
 
-def parse_args_to_dataclass(parser, dc_type):
-    args = parser.parse_args()
+def parse_args_to_dataclass(args, dc_type):
+    #args = parser.parse_args()
     args_dict = vars(args)
 
     final_kwargs = {}

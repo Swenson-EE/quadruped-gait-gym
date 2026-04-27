@@ -44,4 +44,4 @@ with open("config/training_job_defaults.json") as file:
     job_defaults = json.load(file)
 
 
-training_job_parser = build_parser_from_dataclass(TrainingJob, job_defaults)
+training_job_parser = build_parser_from_dataclass(TrainingJob, defaults=job_defaults)
