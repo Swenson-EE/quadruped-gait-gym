@@ -18,6 +18,9 @@ class HyperparameterOptimizer(Optimizer):
     def __init__(self, args: OptimizeArguments):
         super().__init__(args)
 
+        self.optimization_name = "hyperparameter_optimization"
+
+
         self.suggest_config = {
             "learning_rate": {
                 "type": "float",
@@ -76,7 +79,7 @@ class HyperparameterOptimizer(Optimizer):
 
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
-    args.optimization_name = "hyperparameter_optimization"
+    
 
     optimizer = HyperparameterOptimizer(args=args)
     optimizer.run()

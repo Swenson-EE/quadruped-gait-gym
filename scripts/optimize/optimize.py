@@ -41,11 +41,9 @@ class OptimizeArguments:
     n_trials: int = 100
     n_jobs: int = 1
 
-    n_threads: int = 4
+    n_threads: int = 1
 
-    n_steps: int = 1e6
-
-    optimization_name: str = "optimization"
+    n_steps: int = 100_000
 
 optimize_arguments_parser = build_parser_from_dataclass(OptimizeArguments)
 
@@ -55,17 +53,15 @@ class Optimizer:
     def __init__(self, args: OptimizeArguments):
         self.args = args
 
+        
+
         self.LATERAL_WEIGHT = 0.9
         self.Z_WEIGHT = 0.6
-
-        #self.LOW = 0.001
-        #self.HIGH = 1.0
         
         self.suggest_config = {}
 
-        self.SAVE_DIR = os.path.join(LOG_DIR, args.optimization_name)
-
-        os.makedirs(self.SAVE_DIR, exist_ok=True)
+        self.optimization_name = None
+        self.save_dir = None
 
 
     # ENVIRONMENT FACTORY
@@ -309,7 +305,7 @@ class Optimizer:
     def print_best_results(self, best_trial: optuna.trial.FrozenTrial):
         print("\n", "="*5, " [BEST RESULT] ", "="*5)
         print("Score:", best_trial.values)
-        print(f"[{self.args.optimization_name}]\n", best_trial.params, "\n")
+        print(f"[{self.optimization_name}]\n", best_trial.params, "\n")
 
     def use_best_results(self, best_trial: optuna.trial.FrozenTrial):
         pass
@@ -428,8 +424,8 @@ class Optimizer:
 
     def create_study(self) -> optuna.Study:
         return optuna.create_study(
-            study_name=self.args.optimization_name,
-            storage=f"sqlite:///{os.path.join(self.SAVE_DIR, f'{self.args.optimization_name}_study.db')}",
+            study_name=self.optimization_name,
+            storage=f"sqlite:///{os.path.join(self.SAVE_DIR, f'{self.optimization_name}_study.db')}",
             load_if_exists=True,
             directions=["maximize", "minimize", "minimize"],
             sampler=TPESampler(multivariate=True),
@@ -450,7 +446,10 @@ class Optimizer:
         import torch
         torch.set_num_threads(self.args.n_threads)
 
-        print("#"*10, f"[{self.args.optimization_name}]", "#"*10)
+        self.SAVE_DIR = os.path.join(LOG_DIR, self.optimization_name)
+        os.makedirs(self.SAVE_DIR, exist_ok=True)
+
+        print("#"*10, f"[{self.optimization_name}]", "#"*10)
         print("#"*10, f"[TRAINING {self.args.algorithm.value.upper()}]", "#"*10)
         print(self.args.n_trials, "trials")
         print(self.args.n_jobs, "jobs")

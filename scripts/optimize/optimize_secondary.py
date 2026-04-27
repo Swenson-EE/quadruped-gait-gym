@@ -15,6 +15,9 @@ class SecondaryWeightOptimizer(Optimizer):
     def __init__(self, args: OptimizeArguments):
         super().__init__(args)
 
+        self.optimization_name = "secondary_optimization"
+
+
         self.LOW = 1e-4
         self.HIGH = 1e-2
         self.suggest_config = {
@@ -60,7 +63,7 @@ class SecondaryWeightOptimizer(Optimizer):
 
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
-    args.optimization_name = "secondary_optimization"
+    
 
     optimizer = SecondaryWeightOptimizer(args=args)
     optimizer.run()

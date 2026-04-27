@@ -18,6 +18,9 @@ class ModelParameterOptimizer(Optimizer):
     def __init__(self, args: OptimizeArguments):
         super().__init__(args)
 
+        self.optimization_name = "hyperparameter_optimization"
+        
+
         self.suggest_config = {
             "joint_max": {
                 "type": "int",

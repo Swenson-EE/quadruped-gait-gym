@@ -12,8 +12,11 @@ from .optimize import Optimizer, OptimizeArguments, optimize_arguments_parser
 
 
 class PrimaryWeightOptimizer(Optimizer):
+
     def __init__(self, args: OptimizeArguments):
         super().__init__(args)
+
+        self.optimization_name = "primary_optimization"
 
         self.suggest_config = {
             "reward.primary.*": {
@@ -60,7 +63,7 @@ class PrimaryWeightOptimizer(Optimizer):
 
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
-    args.optimization_name = "primary_optimization"
+    
 
     optimizer = PrimaryWeightOptimizer(args=args)
     optimizer.run()

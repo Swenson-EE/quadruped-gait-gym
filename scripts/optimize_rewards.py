@@ -34,6 +34,7 @@ class OptimizeArguments:
     algorithm: Algorithm = Algorithm.PPO_C
     n_trials: int = 100
     n_jobs: int = 1
+    n_steps: int = 1e4
 
     n_threads: int = 4
 
