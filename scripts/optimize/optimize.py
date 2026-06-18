@@ -198,7 +198,7 @@ class Optimizer:
         
         plt.savefig(os.path.join(self.SAVE_DIR,"training_curves.png"), dpi=300, bbox_inches="tight")
 
-    from dataclasses import fields, is_dataclass
+    
 
 
     def normalize(self, d):
@@ -333,7 +333,7 @@ class Optimizer:
                 target=trial_target,
                 target_name=target_name
             )
-            fig.update_layout(title="Overall Hyperparameter Importance")
+            fig.update_layout(title="Overall Parameter Importance")
             fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"param_importances_overall.png"))
 
             # Parallel coordinate
@@ -346,75 +346,79 @@ class Optimizer:
             fig.write_image(os.path.join(self.SAVE_DIR, "overall", f"optimization_history_overall.png"))
 
 
-            pairs = [
-                (0, 1, "forward_vs_lateral"),
-                (0, 2, "forward_vs_z"),
-                (1, 2, "lateral_vs_z")
-            ]
+            def plot_pairs():
+                pairs = [
+                    (0, 1, "forward_vs_lateral"),
+                    (0, 2, "forward_vs_z"),
+                    (1, 2, "lateral_vs_z")
+                ]
 
-            for i, j, name in pairs:
-                fig = vis.plot_pareto_front(
-                    study,
-                    target_names=["Forward, Lateral", "Z"],
-                    targets=lambda t: (t.values[i], t.values[j])
-                )
-                fig.update_layout(title=name.replace("_", " ").title())
-                fig.write_image(os.path.join(self.SAVE_DIR, f"pareto_{name}.png"))
+                for i, j, name in pairs:
+                    fig = vis.plot_pareto_front(
+                        study,
+                        target_names=["Forward, Lateral", "Z"],
+                        targets=lambda t: (t.values[i], t.values[j])
+                    )
+                    fig.update_layout(title=name.replace("_", " ").title())
+                    fig.write_image(os.path.join(self.SAVE_DIR, f"pareto_{name}.png"))
 
-
-
-            # ===================================
-            #           Individual plots
-            # ===================================        
-            trial_values = {
-                0: "forward",
-                1: "lateral",
-                2: "z"
-            }
-
-
-            for index, name in trial_values.items():
-                trial_dir = os.path.join(self.SAVE_DIR, name)
-                os.makedirs(trial_dir, exist_ok=True)
-
-                target_name = f"{name.capitalize()} Distance"
-
-                fig = vis.plot_param_importances(
-                    study,
-                    target=lambda t: t.values[index],
-                    target_name=target_name
-                )
-                fig.update_layout(title=f"{name.capitalize()} Hyperparameter Importances")
-                fig.write_image(os.path.join(trial_dir, f"param_importance_{name}.png"))
+            def plot_individual():
+                # ===================================
+                #           Individual plots
+                # ===================================        
+                trial_values = {
+                    0: "forward",
+                    1: "lateral",
+                    2: "z"
+                }
 
 
-                fig = vis.plot_slice(
-                    study,
-                    target=lambda t: t.values[index],
-                    target_name=target_name
-                )
-                fig.update_layout(title=f"{name.capitalize()} Slice Plot")
-                fig.write_image(os.path.join(trial_dir, f"slice_{name}.png"))
+                for index, name in trial_values.items():
+                    trial_dir = os.path.join(self.SAVE_DIR, name)
+                    os.makedirs(trial_dir, exist_ok=True)
+
+                    target_name = f"{name.capitalize()} Distance"
+
+                    fig = vis.plot_param_importances(
+                        study,
+                        target=lambda t: t.values[index],
+                        target_name=target_name
+                    )
+                    fig.update_layout(title=f"{name.capitalize()} Hyperparameter Importances")
+                    fig.write_image(os.path.join(trial_dir, f"param_importance_{name}.png"))
 
 
-                fig = vis.plot_contour(
-                    study,
-                    target=lambda t: t.values[index],
-                    target_name=target_name
-                )
-                fig.update_layout(title=f"{name.capitalize()} Contour Plot")
-                fig.write_image(os.path.join(trial_dir, f"contour_{name}.png"))
+                    fig = vis.plot_slice(
+                        study,
+                        target=lambda t: t.values[index],
+                        target_name=target_name
+                    )
+                    fig.update_layout(title=f"{name.capitalize()} Slice Plot")
+                    fig.write_image(os.path.join(trial_dir, f"slice_{name}.png"))
+
+
+                    fig = vis.plot_contour(
+                        study,
+                        target=lambda t: t.values[index],
+                        target_name=target_name
+                    )
+                    fig.update_layout(title=f"{name.capitalize()} Contour Plot")
+                    fig.write_image(os.path.join(trial_dir, f"contour_{name}.png"))
 
 
 
-                fig = vis.plot_parallel_coordinate(
-                    study,
-                    params=None,
-                    target=lambda t: t.values[index],
-                    target_name=target_name
-                )
-                fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
-                fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
+                    fig = vis.plot_parallel_coordinate(
+                        study,
+                        params=None,
+                        target=lambda t: t.values[index],
+                        target_name=target_name
+                    )
+                    fig.update_layout(title=f"{name.capitalize()} Parallel Coordinates")
+                    fig.write_image(os.path.join(trial_dir, f"parallel_{name}.png"))
+            
+
+            #plot_individual()
+            #plot_pairs()
         except Exception as e:
             print("-"*5, "[PLOT ERROR]", '-'*5)
             print(e)
@@ -430,6 +434,13 @@ class Optimizer:
             directions=["maximize", "minimize", "minimize"],
             sampler=TPESampler(multivariate=True),
             pruner=optuna.pruners.MedianPruner()
+        )
+    
+    def optimize(self, study: optuna.Study):
+        study.optimize(
+            self.objective,
+            n_trials=self.args.n_trials,
+            n_jobs=self.args.n_jobs # increase for parallel jobs
         )
     
     def _score_trials(self, t: optuna.trial.FrozenTrial):
@@ -457,11 +468,8 @@ class Optimizer:
 
         study = self.create_study()
 
-        study.optimize(
-            self.objective,
-            n_trials=self.args.n_trials,
-            n_jobs=self.args.n_jobs # increase for parallel jobs
-        )
+        self.optimize(study)
+        
         
         best_trial = max(study.best_trials, key=self._score_trials)
         self.print_best_results(best_trial)

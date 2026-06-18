@@ -24,14 +24,20 @@ def submit_algorithm_jobs():
         submit_to_queue('train', job)
 
 def submit_optimize_jobs():
+
+    #opt_to_run = [optimization for optimization in Optimizations]
+    opt_to_run = [Optimizations.SECONDARY_REWARDS]
+
     optimize_jobs = [
         OptimizeJob(
             optimizer=optimization,
             args = OptimizeArguments(
+                #n_steps=1_000,
+                #n_trials=2
                 n_steps=10_000
             )
         ) 
-        for optimization in Optimizations
+        for optimization in opt_to_run
     ]
 
     for job in optimize_jobs:

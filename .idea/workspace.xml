@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="556501ac-4187-421c-ad1e-b84710627ec9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/environment/base_bittle_environment.py" beforeDir="false" afterPath="$PROJECT_DIR$/environment/base_bittle_environment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scheduler/jobs/optimization_job.py" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler/jobs/optimization_job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scheduler/worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler/worker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/complete_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/complete_run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/optimize/optimize.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize/optimize.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/optimize/optimize_model_parameter.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize/optimize_model_parameter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/optimize/optimize_primary.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize/optimize_primary.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/optimize/optimize_secondary.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize/optimize_secondary.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="3FK4i76sv0sYlCfe27itpWwJA4p" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-975db3bf15a3-31b6be0877a2-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.18034.82" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="556501ac-4187-421c-ad1e-b84710627ec9" name="Changes" comment="" />
+      <created>1781810551339</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781810551339</updated>
+    </task>
+    <servers />
+  </component>
+</project>

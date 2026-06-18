@@ -18,7 +18,7 @@ class ModelParameterOptimizer(Optimizer):
     def __init__(self, args: OptimizeArguments):
         super().__init__(args)
 
-        self.optimization_name = "hyperparameter_optimization"
+        self.optimization_name = "model_optimization"
         
 
         self.suggest_config = {
@@ -67,9 +67,6 @@ class ModelParameterOptimizer(Optimizer):
 
 if __name__ == "__main__":
     args = parse_args_to_dataclass(optimize_arguments_parser, OptimizeArguments)
-    args.optimization_name = "model_optimization"
-    args.n_steps = 1e3
-    args.n_trials = 2
 
     optimizer = ModelParameterOptimizer(args=args)
     optimizer.run()

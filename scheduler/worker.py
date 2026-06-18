@@ -55,6 +55,7 @@ def cleanup():
 def optimize_job(job: OptimizeJob):
     try:
         print_stage("START", job)
+        print(f"[OPTIMIZER JOB]: {job.optimizer}")
 
         OptimizerClass: Optimizer = None
         match job.optimizer:
@@ -71,7 +72,6 @@ def optimize_job(job: OptimizeJob):
             print('[ERROR] invalid optimization:', job.optimizer.value)
             return
         
-
 
         optimizer = OptimizerClass(args=job.args)
         optimizer.run()

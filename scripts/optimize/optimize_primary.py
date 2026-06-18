@@ -56,6 +56,13 @@ class PrimaryWeightOptimizer(Optimizer):
     
     def use_best_results(self, best_trial):
         weights: RewardWeights = RewardWeights.from_flat_dict(best_trial.params)
+        weights = asdict(weights)
+
+        weights["reward"]["primary"] = self.normalize(weights["reward"]["primary"])
+        weights["penalty"]["primary"] = self.normalize(weights["penalty"]["primary"])
+
+        weights: RewardWeights = RewardWeights.from_dict(weights)
+
 
         with open(os.path.join(self.SAVE_DIR, "weights.json"), "w") as f:
             json.dump(asdict(weights), f, indent = 4)

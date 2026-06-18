@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import TypeVar, Generic
 
 import gymnasium as gym
+import mujoco
 import numpy as np
 
 #from parameters import rewards
@@ -65,7 +66,6 @@ class BaseBittleEnvironment(gym.Env):
 
         self.phase = 0
         self.phase_rate = 2 * np.pi * self.params.phase_rate
-
 
 
         self.observation_space = gym.spaces.Dict({
@@ -133,6 +133,7 @@ class BaseBittleEnvironment(gym.Env):
         #info['penalty'] = penalty
         #info['observation'] = observation
         #info['components'] = sys_reward.get_components()        
+        
 
         total_reward, reward_sum, penalty_sum = compute_total(self.weights, reward, penalty)
 
@@ -199,3 +200,5 @@ class BaseBittleEnvironment(gym.Env):
         return kn_world.get_position()
 
     
+
+

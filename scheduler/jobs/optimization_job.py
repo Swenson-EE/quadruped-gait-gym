@@ -4,7 +4,7 @@ from enum import Enum
 from scripts.optimize.optimize import OptimizeArguments
 
 
-@dataclass
+
 class Optimizations(str, Enum):
     PRIMARY_REWARDS = "primary-rewards"
     SECONDARY_REWARDS = "secondary-rewards"
@@ -15,7 +15,7 @@ class Optimizations(str, Enum):
 
 @dataclass
 class OptimizeJob:
-    optimizer: Optimizations = Optimizations.PRIMARY_REWARDS
+    optimizer: Optimizations = Optimizations.MODEL_PARAMETER
 
     args: OptimizeArguments = field(default_factory=OptimizeArguments)
 
